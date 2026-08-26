@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@layer utilities {
+  /* Penguin Mascot Keyframe Animations */
+  
+  /* Idle: float up/down -4px, 1400ms sine loop */
+  @keyframes floatUp {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  /* Walking: rock left/right +-13deg, 340ms loop */
+  @keyframes waddleWalk {
+    0%, 100% {
+      transform: rotate(-13deg) translateY(0);
+    }
+    50% {
+      transform: rotate(13deg) translateY(-2px);
+    }
+  }
+
+  /* Celebrating: jump -16px + spin / pop, 270ms loop */
+  @keyframes celebrateJump {
+    0%, 100% {
+      transform: translateY(0) scale(1) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-16px) scale(1.1) rotate(8deg);
+    }
+  }
+
+  /* Climbing: bob up/down -5px, 580ms loop, slight 18deg lean */
+  @keyframes climbLean {
+    0%, 100% {
+      transform: translateY(0px) rotate(18deg);
+    }
+    50% {
+      transform: translateY(-5px) rotate(12deg);
+    }
+  }
+
+  .animate-penguin-float {
+    animation: floatUp 1.4s ease-in-out infinite;
+  }
+
+  .animate-penguin-walk {
+    animation: waddleWalk 0.34s ease-in-out infinite;
+  }
+
+  .animate-penguin-celebrate {
+    animation: celebrateJump 0.27s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite;
+  }
+
+  .animate-penguin-climb {
+    animation: climbLean 0.58s ease-in-out infinite;
+  }
+}

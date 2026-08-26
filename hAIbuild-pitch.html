@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hAIbuild — Project Pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Literata:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F3F6F7;
+    --surface: #FFFFFF;
+    --surface-2: #EAF0F1;
+    --ink: #16232E;
+    --muted: #55666D;
+    --accent: #D9682F;
+    --accent-ink: #FFFFFF;
+    --accent2: #14808A;
+    --accent2-soft: #DCEEF0;
+    --line: #CBD8DB;
+    --line-strong: #9FB2B7;
+    --shadow: 0 1px 2px rgba(22,35,46,0.04), 0 8px 24px -12px rgba(22,35,46,0.12);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0E161D;
+      --surface: #16212A;
+      --surface-2: #1C2932;
+      --ink: #E9EFF1;
+      --muted: #96A8AE;
+      --accent: #F0975E;
+      --accent-ink: #17110B;
+      --accent2: #4FC4CE;
+      --accent2-soft: #17323868;
+      --line: #2B3A43;
+      --line-strong: #3D515C;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--bg);
+  }
+
+  body {
+    color: var(--ink);
+    font-family: 'Literata', Georgia, 'Times New Roman', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--accent2-soft); color: var(--ink); }
+
+  .page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: clamp(2rem, 6vw, 5rem) clamp(1.25rem, 5vw, 2.5rem) 6rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+    text-wrap: balance;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  a { color: var(--accent2); }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--surface-2);
+    padding: 0.1em 0.4em;
+    border-radius: 5px;
+  }
+
+  /* Masthead */
+  .masthead { padding-bottom: 2.5rem; border-bottom: 1px solid var(--line); }
+  .masthead .eyebrow { margin-bottom: 1.1rem; }
+  h1.wordmark {
+    font-weight: 800;
+    font-size: clamp(2.75rem, 7vw, 4.25rem);
+    letter-spacing: -0.015em;
+    line-height: 1.02;
+  }
+  h1.wordmark .dot { color: var(--accent); }
+  .tagline {
+    font-family: 'Literata', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+    color: var(--muted);
+    max-width: 46ch;
+    margin: 1.1rem 0 1.6rem;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.6rem;
+  }
+  .chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 0.32rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    color: var(--muted);
+    background: var(--surface);
+  }
+  .chip.status { border-color: var(--accent2); color: var(--accent2); }
+
+  /* Sections */
+  section.block { padding: 3.2rem 0; border-bottom: 1px solid var(--line); }
+  section.block:last-of-type { border-bottom: none; }
+  .block h2 {
+    font-weight: 700;
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+    margin-top: 0.9rem;
+    margin-bottom: 1.1rem;
+  }
+  .block > p, .block > .lede { max-width: 68ch; }
+  .lede { font-size: 1.1rem; color: var(--ink); }
+  .block p + p { margin-top: 1rem; }
+  .muted { color: var(--muted); }
+
+  /* Daily loop */
+  .loop {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 1rem;
+    margin: 2rem 0 1.5rem;
+  }
+  .loop-card {
+    flex: 1 1 180px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.1rem 1.2rem;
+    box-shadow: var(--shadow);
+  }
+  .loop-card .step {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    color: var(--accent2);
+  }
+  .loop-card h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0.4rem 0 0.4rem;
+  }
+  .loop-card p { margin: 0; font-size: 0.92rem; color: var(--muted); line-height: 1.55; }
+  .loop-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--line-strong);
+    font-size: 1.3rem;
+    flex: 0 0 auto;
+  }
+  @media (max-width: 760px) {
+    .loop { flex-direction: column; }
+    .loop-arrow { transform: rotate(90deg); padding: 0.1rem 0; }
+  }
+
+  /* Pipelines */
+  .pipeline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.6rem;
+    margin: 1.6rem 0;
+  }
+  .pnode {
+    flex: 1 1 150px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+  }
+  .pnode .k {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  .pnode .v { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 0.96rem; }
+  .pnode.hi { border-color: var(--accent2); background: var(--accent2-soft); }
+  .parrow { display: flex; align-items: center; justify-content: center; color: var(--line-strong); font-size: 1.2rem; flex: 0 0 auto; }
+  @media (max-width: 700px) {
+    .pipeline { flex-direction: column; }
+    .parrow { transform: rotate(90deg); }
+  }
+
+  /* Tech stack table */
+  .stack-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; overflow-x: auto; display: block; }
+  .stack-table thead th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0 0 0.6rem;
+    border-bottom: 1px solid var(--line-strong);
+    font-weight: 600;
+  }
+  .stack-table td {
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    font-size: 0.95rem;
+  }
+  .stack-table td.svc { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; white-space: nowrap; padding-right: 1.2rem; }
+  .stack-table td.role { color: var(--muted); }
+
+  /* Roadmap categories */
+  .tiers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.1rem; margin-top: 1.8rem; }
+  @media (max-width: 700px) { .tiers { grid-template-columns: 1fr; } }
+  .tier {
+    background: var(--surface);
+    border: 1.5px solid var(--accent);
+    border-radius: 14px;
+    padding: 1.3rem 1.3rem 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .tier h3 {
+    font-size: 1.05rem;
+    margin: 0 0 0.9rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .tier ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+  .tier li b { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 0.92rem; display: block; }
+  .tier li span { color: var(--muted); font-size: 0.86rem; line-height: 1.5; }
+
+  /* Timeline */
+  .timeline { margin-top: 1.8rem; position: relative; padding-left: 1.6rem; }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 0.28rem;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    width: 1px;
+    background: var(--line-strong);
+  }
+  .tl-item { position: relative; padding-bottom: 1.6rem; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    left: -1.6rem;
+    top: 0.32rem;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent2);
+  }
+  .tl-item.done::before { background: var(--accent2); }
+  .tl-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent2);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+  .tl-item h3 { font-size: 0.98rem; font-weight: 700; margin: 0 0 0.25rem; }
+  .tl-item p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+
+  /* Footer */
+  .colophon {
+    padding-top: 2.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.3rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .colophon .emails { display: flex; flex-direction: column; gap: 0.2rem; text-align: right; }
+
+  @media print {
+    body { background: #fff; }
+    section.block { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <span class="eyebrow">Patchamomma 2026 · Build Phase Touchpoint 1</span>
+    <h1 class="wordmark">hAIbuild<span class="dot">.</span></h1>
+    <p class="tagline">A gamified daily-habit app that keeps everyone fluent in AI/ML using real industry trend data in an engaging way that lets you skip the daily doomscrolling.</p>
+    <div class="meta-row">
+      <span class="chip status">Core app: live &amp; functional</span>
+      <span class="chip">Built by Preethi &amp; Anuhya</span>
+      <span class="chip">Gemini API</span>
+      <span class="chip">Firestore</span>
+      <span class="chip">BigQuery</span>
+      <span class="chip">ADK</span>
+      <span class="chip">Cloud Run</span>
+    </div>
+  </header>
+
+  <section class="block">
+    <span class="eyebrow">01 — The Problem</span>
+    <h2>Nobody stays current by accident.</h2>
+    <p class="lede">AI/ML moves too fast to track passively. New models, tools, and techniques — RAG, agents, vector databases, fine-tuning — reshape best practice every few months.</p>
+    <p>Yet most people whose work touches technology have no structured way to keep up. They either binge-read newsletters in sporadic bursts, or they fall behind entirely and find out about a shift only when it's already the new normal.</p>
+  </section>
+
+  <section class="block">
+    <span class="eyebrow">02 — The Idea</span>
+    <h2>Ten minutes a day, built like a habit.</h2>
+    <p class="lede">hAIbuild turns "staying current in AI/ML" into a daily rep — you're literally building your AI fluency, one habit rep at a time. Every day, the app serves four bite-sized pieces:</p>
+
+    <div class="loop">
+      <div class="loop-card">
+        <span class="step">Step 1</span>
+        <h3>Pulse</h3>
+        <p>What's actually trending right now — derived from real developer signal, not editorial guesswork.</p>
+      </div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-card">
+        <span class="step">Step 2</span>
+        <h3>Concept</h3>
+        <p>A deep-dive that builds durable intuition on one core ML idea.</p>
+      </div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-card">
+        <span class="step">Step 3</span>
+        <h3>Practice</h3>
+        <p>An applied problem that keeps hands-on skills sharp.</p>
+      </div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-card">
+        <span class="step">Step 4</span>
+        <h3>Battle</h3>
+        <p>A timed quiz that locks the day's learning into memory.</p>
+      </div>
+    </div>
+
+    <p>Streaks, XP, an ELO rating, and a penguin mascot make the habit sticky — the same reward loop that makes a language-learning streak hard to break, pointed at AI/ML fluency instead.</p>
+  </section>
+
+  <section class="block">
+    <span class="eyebrow">03 — Under the Hood</span>
+    <h2>A small agent system drives personalization.</h2>
+    <p class="lede">Built on Google's Agent Development Kit, three Gemini-powered agents turn raw signal into a single day's content.</p>
+
+    <div class="pipeline">
+      <div class="pnode">
+        <span class="k">Public data</span>
+        <span class="v">SO tag trends + HN AI/ML volume</span>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pnode hi">
+        <span class="k">BigQuery</span>
+        <span class="v">Trend ranking</span>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pnode">
+        <span class="k">Agent</span>
+        <span class="v">Trend Agent</span>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pnode">
+        <span class="k">Agent + Firestore</span>
+        <span class="v">Curriculum Agent</span>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pnode hi">
+        <span class="k">Output</span>
+        <span class="v">Today's Pulse · Concept · Practice · Battle</span>
+      </div>
+    </div>
+
+    <div class="pipeline">
+      <div class="pnode">
+        <span class="k">Firestore</span>
+        <span class="v">Streaks, XP, battle history</span>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pnode">
+        <span class="k">Agent</span>
+        <span class="v">Coach Agent</span>
+      </div>
+      <div class="parrow">→</div>
+      <div class="pnode hi">
+        <span class="k">Output</span>
+        <span class="v">Weekly readiness report</span>
+      </div>
+    </div>
+
+    <table class="stack-table">
+      <thead><tr><th>Service</th><th>Role in hAIbuild</th></tr></thead>
+      <tbody>
+        <tr><td class="svc">Gemini API</td><td class="role">Generates Pulse briefings, concept deep-dives, quiz questions, hints, and feedback. Already integrated.</td></tr>
+        <tr><td class="svc">Firestore</td><td class="role">Replaces localStorage — cross-device profile, streaks, XP, ELO, battle history, leaderboard.</td></tr>
+        <tr><td class="svc">BigQuery</td><td class="role">Computes the trend signal from public developer-activity datasets; precomputed daily, not queried live per request.</td></tr>
+        <tr><td class="svc">ADK</td><td class="role">Orchestrates the Trend, Curriculum, and Coach agents.</td></tr>
+        <tr><td class="svc">Cloud Run</td><td class="role">Deployment target, scale-to-zero.</td></tr>
+      </tbody>
+    </table>
+
+    <p class="muted" style="margin-top:1.4rem; font-size:0.92rem;">Data sources: <code>bigquery-public-data.stackoverflow</code> (tag volume/growth — e.g. spikes in <code>rag</code>, <code>vector-database</code>, <code>fine-tuning</code>) and <code>bigquery-public-data.hacker_news</code> (AI/ML discussion volume), both free public datasets.</p>
+  </section>
+
+  <section class="block">
+    <span class="eyebrow">04 — Gamification Roadmap</span>
+    <h2>Every feature below ships before lock.</h2>
+    <p class="lede">Preethi and Anuhya are committing to the full set below by Sep 7 — grouped by what each mechanic reinforces.</p>
+
+    <div class="tiers">
+      <div class="tier">
+        <h3>Quiz &amp; Battle Formats</h3>
+        <ul>
+          <li><b>1v1 Battle Royale</b><span>Real-time head-to-head quiz vs. another user or bot, ELO-adjusted.</span></li>
+          <li><b>Matrix Mode</b><span>Grid of concept tiles, race to clear rows/columns, Codenames-style.</span></li>
+          <li><b>Boss fights</b><span>Weekly harder quiz gated behind a streak/XP threshold.</span></li>
+          <li><b>Speed rounds</b><span>60-second rapid-fire true/false on the day's Pulse trends.</span></li>
+          <li><b>Debug the code</b><span>Spot-the-bug challenges in short RAG/agent pipeline snippets.</span></li>
+        </ul>
+      </div>
+      <div class="tier">
+        <h3>Progression &amp; Identity</h3>
+        <ul>
+          <li><b>Skill tree</b><span>Visual map of ML domains (NLP, CV, agents, MLOps) that unlocks as weak spots close.</span></li>
+          <li><b>Badges &amp; titles</b><span>"RAG Rookie" to "Agent Architect," shown on a public profile.</span></li>
+          <li><b>Penguin evolution</b><span>Mascot visually levels up and gains gear as streak and XP grow.</span></li>
+        </ul>
+      </div>
+      <div class="tier">
+        <h3>Social &amp; Competitive</h3>
+        <ul>
+          <li><b>Leaderboards</b><span>Daily / weekly / all-time, filterable by company or friend group.</span></li>
+          <li><b>Guilds / squads</b><span>Small teams sharing one streak goal.</span></li>
+          <li><b>Challenge a friend</b><span>Send a specific Battle quiz link, async score comparison.</span></li>
+        </ul>
+      </div>
+      <div class="tier">
+        <h3>Retention Mechanics</h3>
+        <ul>
+          <li><b>Streak freeze</b><span>One free skip a week so a missed day doesn't break a long streak.</span></li>
+          <li><b>Daily surprise drop</b><span>Random bonus XP or a wildcard question from an unexpected topic.</span></li>
+          <li><b>Fluency score card</b><span>Shareable weekly snapshot from the Coach Agent, built to be posted outward.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <span class="eyebrow">05 — Status &amp; Timeline</span>
+    <h2>Building on a working app, not a blank page.</h2>
+    <p class="lede">The core app already runs end to end — React/Vite/Express, Gemini API wired in for dynamic content. This Build Phase layers in real persistence, the trend pipeline, and agent orchestration.</p>
+
+    <div class="timeline">
+      <div class="tl-item done">
+        <span class="tl-date">Aug 20</span>
+        <h3>Idea locked, Firestore migration started</h3>
+        <p>Touchpoint 1 submitted.</p>
+      </div>
+      <div class="tl-item">
+        <span class="tl-date">Aug 28</span>
+        <h3>Checkpoint 2</h3>
+        <p>BigQuery trend pipeline and Curriculum Agent working end to end.</p>
+      </div>
+      <div class="tl-item">
+        <span class="tl-date">Sep 5</span>
+        <h3>Final checkpoint</h3>
+        <p>Interviewer/Coach agents complete, deployed on Cloud Run, polish pass.</p>
+      </div>
+      <div class="tl-item">
+        <span class="tl-date">Sep 7</span>
+        <h3>Lock submission</h3>
+        <p>No extensions.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="colophon">
+    <span>hAIbuild — Preethi &amp; Anuhya</span>
+    <span class="emails">
+      <span>preethi582k1@gmail.com</span>
+      <span>anuhya1727@gmail.com</span>
+    </span>
+  </div>
+
+</div>
+</body>
+</html>

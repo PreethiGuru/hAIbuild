@@ -1,0 +1,6 @@
+{
+  "name": "AIDailyHabit",
+  "description": "Daily AIML interview preparation app with DSA problems, ML concepts, timed battles, mountain climb progress tracking, and penguin mascot.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
