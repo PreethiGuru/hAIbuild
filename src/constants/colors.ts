@@ -1,15 +1,15 @@
 export const COLORS = {
-  background: '#0F1419',
-  surface: '#1A1F2E',
-  surfaceHigh: '#212838',
-  textPrimary: '#E8F4F8',
-  textSecondary: '#A0B8D4',
-  textMuted: '#5A7AA0',
-  accent: '#87CEEB', // sky blue
-  accent2: '#1E90FF', // blue
-  success: '#26D07C',
-  danger: '#FF6B6B',
-  warning: '#F59E0B',
-  border: '#2A3F5F',
-  borderFaint: '#1E2D45',
+  background: '#FFFFFF',
+  surface: '#F8F9FA',
+  surfaceHigh: '#F1F3F4',
+  textPrimary: '#202124',
+  textSecondary: '#5F6368',
+  textMuted: '#80868B',
+  accent: '#1A73E8', // Google Blue
+  accent2: '#4285F4', // Google Blue (classic)
+  success: '#34A853', // Google Green
+  danger: '#EA4335', // Google Red
+  warning: '#EA8600', // Google Yellow family, deepened for contrast on white
+  border: '#DADCE0',
+  borderFaint: '#E8EAED',
 } as const;

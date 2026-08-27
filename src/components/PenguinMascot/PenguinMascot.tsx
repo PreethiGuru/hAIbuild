@@ -171,7 +171,7 @@ export const PenguinMascot: React.FC<PenguinMascotProps> = ({
   const penguinPos = getPenguinPos(clampedProgress);
 
   return (
-    <div className={`relative w-full max-w-xl mx-auto rounded-2xl overflow-hidden bg-[#161C26] border border-[#2A3F5F] p-2 shadow-xl ${className}`}>
+    <div className={`relative w-full max-w-xl mx-auto rounded-2xl overflow-hidden bg-surface border border-border p-2 shadow-xl ${className}`}>
       {/* Mountain Viewport SVG */}
       <svg
         viewBox="0 0 320 300"
@@ -252,7 +252,7 @@ export const PenguinMascot: React.FC<PenguinMascotProps> = ({
       {/* Label Overlays as specified in prompt */}
       {/* 100Q at left 13%, top 73% */}
       <div
-        className="absolute pointer-events-none px-2 py-0.5 rounded-full bg-[#1A1F2E]/90 border border-[#87CEEB]/40 text-[10px] font-semibold text-[#87CEEB] shadow"
+        className="absolute pointer-events-none px-2 py-0.5 rounded-full bg-surface/90 border border-accent/40 text-[10px] font-semibold text-accent shadow"
         style={{ left: '13%', top: '73%' }}
       >
         100Q
@@ -260,7 +260,7 @@ export const PenguinMascot: React.FC<PenguinMascotProps> = ({
 
       {/* 500Q at left 33%, top 44% */}
       <div
-        className="absolute pointer-events-none px-2 py-0.5 rounded-full bg-[#1A1F2E]/90 border border-[#F59E0B]/40 text-[10px] font-semibold text-[#F59E0B] shadow"
+        className="absolute pointer-events-none px-2 py-0.5 rounded-full bg-surface/90 border border-warning/40 text-[10px] font-semibold text-warning shadow"
         style={{ left: '33%', top: '44%' }}
       >
         500Q
@@ -268,7 +268,7 @@ export const PenguinMascot: React.FC<PenguinMascotProps> = ({
 
       {/* Summit / 1,000Q at left 59%, top 8% */}
       <div
-        className="absolute pointer-events-none px-2.5 py-0.5 rounded-full bg-[#1A1F2E]/90 border border-[#26D07C]/50 text-[10px] font-bold text-[#26D07C] shadow flex items-center gap-1"
+        className="absolute pointer-events-none px-2.5 py-0.5 rounded-full bg-surface/90 border border-success/50 text-[10px] font-bold text-success shadow flex items-center gap-1"
         style={{ left: '50%', top: '8%' }}
       >
         <span> Summit / 1,000Q</span>

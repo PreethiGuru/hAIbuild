@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: #FFFFFF;
+  --color-surface: #F8F9FA;
+  --color-surfaceHigh: #F1F3F4;
+  --color-textPrimary: #202124;
+  --color-textSecondary: #5F6368;
+  --color-textMuted: #80868B;
+  --color-accent: #1A73E8;
+  --color-accent2: #4285F4;
+  --color-success: #34A853;
+  --color-danger: #EA4335;
+  --color-warning: #EA8600;
+  --color-border: #DADCE0;
+  --color-borderFaint: #E8EAED;
+}
+
 @layer utilities {
   /* Penguin Mascot Keyframe Animations */
   

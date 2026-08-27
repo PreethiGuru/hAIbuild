@@ -59,20 +59,20 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
   };
 
   return (
-    <div className="space-y-6 pb-24 text-[#E8F4F8]">
+    <div className="space-y-6 pb-24 text-textPrimary">
       {/* Profile Header Card */}
-      <div className="bg-[#1A1F2E] p-5 rounded-2xl border border-[#2A3F5F] shadow-lg flex items-center justify-between">
+      <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg flex items-center justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-md bg-[#87CEEB]/20 text-[#87CEEB] text-xs font-bold uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-md bg-accent/20 text-accent text-xs font-bold uppercase tracking-wider">
               Level {profile.level}
             </span>
-            <span className="text-xs text-[#A0B8D4]">{profile.xp} XP</span>
+            <span className="text-xs text-textSecondary">{profile.xp} XP</span>
           </div>
-          <h1 className="text-xl font-bold text-[#E8F4F8]">AIML Explorer</h1>
-          <p className="text-xs text-[#5A7AA0]">Consistent Daily Learner</p>
+          <h1 className="text-xl font-bold text-textPrimary">AIML Explorer</h1>
+          <p className="text-xs text-textMuted">Consistent Daily Learner</p>
         </div>
-        <div className="w-16 h-16 rounded-2xl bg-[#212838] border border-[#2A3F5F] flex items-center justify-center shadow-inner">
+        <div className="w-16 h-16 rounded-2xl bg-surfaceHigh border border-border flex items-center justify-center shadow-inner">
           <PenguinMascot state="idle" size="small" />
         </div>
       </div>
@@ -80,11 +80,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
       {/* Mountain Climb Visualization */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#87CEEB]">
+          <span className="text-xs font-bold uppercase tracking-wider text-accent">
             Mountain Climb Progress
           </span>
-          <span className="text-xs font-semibold text-[#A0B8D4]">
-            <strong className="text-[#87CEEB]">{totalQuestions}</strong> / 1,000 milestones
+          <span className="text-xs font-semibold text-textSecondary">
+            <strong className="text-accent">{totalQuestions}</strong> / 1,000 milestones
           </span>
         </div>
 
@@ -96,16 +96,16 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
       </div>
 
       {/* Progress Bar with Milestone Markers */}
-      <div className="bg-[#1A1F2E] p-4 rounded-2xl border border-[#2A3F5F] space-y-2 shadow-md">
-        <div className="flex justify-between text-[11px] text-[#A0B8D4] font-semibold">
+      <div className="bg-surface p-4 rounded-2xl border border-border space-y-2 shadow-md">
+        <div className="flex justify-between text-[11px] text-textSecondary font-semibold">
           <span>Base (0)</span>
           <span>100Q</span>
           <span>500Q</span>
           <span>1,000Q Summit</span>
         </div>
-        <div className="w-full h-3 bg-[#0F1419] rounded-full overflow-hidden border border-[#2A3F5F] relative">
+        <div className="w-full h-3 bg-background rounded-full overflow-hidden border border-border relative">
           <div
-            className="h-full bg-gradient-to-r from-[#1E90FF] via-[#87CEEB] to-[#26D07C] transition-all duration-700"
+            className="h-full bg-gradient-to-r from-accent2 via-accent to-success transition-all duration-700"
             style={{ width: `${mountainProgress}%` }}
           />
         </div>
@@ -114,43 +114,43 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
       {/* 2x2 Stat Grid */}
       <div className="grid grid-cols-2 gap-3">
         {/* Streak */}
-        <div className="bg-[#1A1F2E] p-4 rounded-2xl border border-[#2A3F5F] shadow space-y-1">
-          <div className="flex items-center gap-2 text-[#F59E0B]">
-            <Flame className="w-5 h-5 fill-[#F59E0B]" />
+        <div className="bg-surface p-4 rounded-2xl border border-border shadow space-y-1">
+          <div className="flex items-center gap-2 text-warning">
+            <Flame className="w-5 h-5 fill-warning" />
             <span className="text-xs font-bold uppercase tracking-wider">Streak</span>
           </div>
-          <div className="text-2xl font-bold text-[#E8F4F8]">{profile.streakCount} days</div>
-          <div className="text-[10px] text-[#5A7AA0]">Best: {profile.longestStreak} days</div>
+          <div className="text-2xl font-bold text-textPrimary">{profile.streakCount} days</div>
+          <div className="text-[10px] text-textMuted">Best: {profile.longestStreak} days</div>
         </div>
 
         {/* Elo Rating */}
-        <div className="bg-[#1A1F2E] p-4 rounded-2xl border border-[#2A3F5F] shadow space-y-1">
-          <div className="flex items-center gap-2 text-[#87CEEB]">
+        <div className="bg-surface p-4 rounded-2xl border border-border shadow space-y-1">
+          <div className="flex items-center gap-2 text-accent">
             <Shield className="w-5 h-5" />
             <span className="text-xs font-bold uppercase tracking-wider">Elo Rating</span>
           </div>
-          <div className="text-2xl font-bold text-[#E8F4F8]">{profile.rating}</div>
-          <div className="text-[10px] text-[#5A7AA0]">Ranked Competitive</div>
+          <div className="text-2xl font-bold text-textPrimary">{profile.rating}</div>
+          <div className="text-[10px] text-textMuted">Ranked Competitive</div>
         </div>
 
         {/* Win Rate */}
-        <div className="bg-[#1A1F2E] p-4 rounded-2xl border border-[#2A3F5F] shadow space-y-1">
-          <div className="flex items-center gap-2 text-[#26D07C]">
+        <div className="bg-surface p-4 rounded-2xl border border-border shadow space-y-1">
+          <div className="flex items-center gap-2 text-success">
             <TrendingUp className="w-5 h-5" />
             <span className="text-xs font-bold uppercase tracking-wider">Win Rate</span>
           </div>
-          <div className="text-2xl font-bold text-[#E8F4F8]">{winRate}%</div>
-          <div className="text-[10px] text-[#5A7AA0]">{profile.stats.battlesWon} / {profile.stats.battlesPlayed} battles</div>
+          <div className="text-2xl font-bold text-textPrimary">{winRate}%</div>
+          <div className="text-[10px] text-textMuted">{profile.stats.battlesWon} / {profile.stats.battlesPlayed} battles</div>
         </div>
 
         {/* Level & XP */}
-        <div className="bg-[#1A1F2E] p-4 rounded-2xl border border-[#2A3F5F] shadow space-y-1">
-          <div className="flex items-center gap-2 text-[#1E90FF]">
+        <div className="bg-surface p-4 rounded-2xl border border-border shadow space-y-1">
+          <div className="flex items-center gap-2 text-accent2">
             <Zap className="w-5 h-5" />
             <span className="text-xs font-bold uppercase tracking-wider">Level & XP</span>
           </div>
-          <div className="text-2xl font-bold text-[#E8F4F8]">Lvl {profile.level}</div>
-          <div className="text-[10px] text-[#5A7AA0]">{profile.xp} Total XP</div>
+          <div className="text-2xl font-bold text-textPrimary">Lvl {profile.level}</div>
+          <div className="text-[10px] text-textMuted">{profile.xp} Total XP</div>
         </div>
       </div>
 
@@ -160,23 +160,23 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
           <button
             onClick={handleFetchAiSummary}
             disabled={loadingSummary}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#1A1F2E] to-[#212838] border-2 border-[#87CEEB] text-[#87CEEB] hover:bg-[#87CEEB]/10 transition font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-surface to-surfaceHigh border-2 border-accent text-accent hover:bg-accent/10 transition font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
             <Bot className="w-5 h-5" />
             {loadingSummary ? 'Analyzing Your Performance...' : showSummaryCard ? 'Hide AI Feedback' : 'How am I doing?'}
           </button>
 
           {showSummaryCard && aiSummary && (
-            <div className="p-4 bg-[#1A1F2E] rounded-2xl border border-[#87CEEB]/50 shadow-xl flex gap-4 items-start animate-fade-in">
+            <div className="p-4 bg-surface rounded-2xl border border-accent/50 shadow-xl flex gap-4 items-start animate-fade-in">
               <div className="shrink-0 pt-1">
                 <PenguinMascot state="walking" size="small" />
               </div>
-              <div className="space-y-1 text-xs text-[#E8F4F8]">
-                <div className="flex items-center gap-1.5 font-bold text-[#87CEEB]">
+              <div className="space-y-1 text-xs text-textPrimary">
+                <div className="flex items-center gap-1.5 font-bold text-accent">
                   <Sparkles className="w-4 h-4" />
                   <span>Coach Penguin AI Feedback</span>
                 </div>
-                <p className="leading-relaxed text-[#A0B8D4]">{aiSummary}</p>
+                <p className="leading-relaxed text-textSecondary">{aiSummary}</p>
               </div>
             </div>
           )}
@@ -184,50 +184,50 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
       )}
 
       {/* Detailed Learning Stats */}
-      <div className="bg-[#1A1F2E] p-5 rounded-2xl border border-[#2A3F5F] shadow-lg space-y-3">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-[#5A7AA0] mb-2">
+      <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-3">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-textMuted mb-2">
           LEARNING BREAKDOWN
         </h3>
 
-        <div className="divide-y divide-[#1E2D45] text-xs">
+        <div className="divide-y divide-borderFaint text-xs">
           <div className="py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[#A0B8D4]">
-              <Code2 className="w-4 h-4 text-[#87CEEB]" />
+            <div className="flex items-center gap-2 text-textSecondary">
+              <Code2 className="w-4 h-4 text-accent" />
               <span>DSA Problems Solved</span>
             </div>
-            <span className="font-bold text-[#E8F4F8]">{profile.stats.dsaSolvedCount}</span>
+            <span className="font-bold text-textPrimary">{profile.stats.dsaSolvedCount}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[#A0B8D4]">
-              <BookOpen className="w-4 h-4 text-[#1E90FF]" />
+            <div className="flex items-center gap-2 text-textSecondary">
+              <BookOpen className="w-4 h-4 text-accent2" />
               <span>ML Concepts Studied</span>
             </div>
-            <span className="font-bold text-[#E8F4F8]">{profile.stats.mlConceptsViewedCount}</span>
+            <span className="font-bold text-textPrimary">{profile.stats.mlConceptsViewedCount}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[#A0B8D4]">
-              <MessageSquare className="w-4 h-4 text-[#F59E0B]" />
+            <div className="flex items-center gap-2 text-textSecondary">
+              <MessageSquare className="w-4 h-4 text-warning" />
               <span>ML Interview Q&As</span>
             </div>
-            <span className="font-bold text-[#E8F4F8]">{profile.stats.mlQaViewedCount}</span>
+            <span className="font-bold text-textPrimary">{profile.stats.mlQaViewedCount}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[#A0B8D4]">
-              <Swords className="w-4 h-4 text-[#FF6B6B]" />
+            <div className="flex items-center gap-2 text-textSecondary">
+              <Swords className="w-4 h-4 text-danger" />
               <span>Practice Battles Played</span>
             </div>
-            <span className="font-bold text-[#E8F4F8]">{profile.stats.battlesPlayed}</span>
+            <span className="font-bold text-textPrimary">{profile.stats.battlesPlayed}</span>
           </div>
 
           <div className="py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[#A0B8D4]">
-              <Award className="w-4 h-4 text-[#26D07C]" />
+            <div className="flex items-center gap-2 text-textSecondary">
+              <Award className="w-4 h-4 text-success" />
               <span>Battles Won / Lost</span>
             </div>
-            <span className="font-bold text-[#E8F4F8]">
+            <span className="font-bold text-textPrimary">
               {profile.stats.battlesWon} W / {profile.stats.battlesLost} L
             </span>
           </div>
