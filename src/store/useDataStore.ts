@@ -6,6 +6,7 @@ import {
   loadProfile,
   markContentAsViewed,
   recordBattleResult as recordBattleResultInFirestore,
+  recordDebugChallengeResult as recordDebugChallengeResultInFirestore,
   recordSpeedRoundResult as recordSpeedRoundResultInFirestore,
   saveProfile,
 } from './firestoreStore';
@@ -62,6 +63,12 @@ export function useDataStore() {
     []
   );
 
+  const recordDebugChallengeResult = useCallback(async (correct: boolean) => {
+    const res = await recordDebugChallengeResultInFirestore(correct);
+    setProfile(await loadProfile());
+    return res;
+  }, []);
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -81,5 +88,6 @@ export function useDataStore() {
     markContentViewed,
     recordBattleResult,
     recordSpeedRoundResult,
+    recordDebugChallengeResult,
   };
 }

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BattleResult, InterviewDifficulty, MlInterviewQaQuestion, SpeedRoundResult } from '../types';
+import { BattleResult, DebugChallengeResult, InterviewDifficulty, MlInterviewQaQuestion, SpeedRoundResult } from '../types';
 import { getBattleQuestionById, getRandomBattleQuestion, getRandomBattleQuestionByDifficulty } from '../data/questions';
 import { checkHasGemini, generateAIBattleQuestion } from '../ai/gemini';
-import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check, Crown, Zap } from 'lucide-react';
+import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check, Crown, Zap, Bug } from 'lucide-react';
 import { SpeedRoundMode } from './SpeedRoundMode';
+import { DebugCodeMode } from './DebugCodeMode';
 
 const BOSS_FIGHT_STREAK_THRESHOLD = 3;
 
@@ -12,16 +13,18 @@ interface BattleTabProps {
   streakCount: number;
   onRecordResult: (won: boolean, difficulty?: InterviewDifficulty) => Promise<BattleResult>;
   onRecordSpeedRoundResult: (correctCount: number, totalAnswered: number) => Promise<SpeedRoundResult>;
+  onRecordDebugChallengeResult: (correct: boolean) => Promise<DebugChallengeResult>;
 }
 
 type BattlePhase = 'idle' | 'active' | 'result';
-type BattleMode = 'solo' | 'speed';
+type BattleMode = 'solo' | 'speed' | 'debug';
 
 export const BattleTab: React.FC<BattleTabProps> = ({
   currentRating,
   streakCount,
   onRecordResult,
   onRecordSpeedRoundResult,
+  onRecordDebugChallengeResult,
 }) => {
   const [mode, setMode] = useState<BattleMode>('solo');
   const [phase, setPhase] = useState<BattlePhase>('idle');
@@ -162,6 +165,11 @@ export const BattleTab: React.FC<BattleTabProps> = ({
           onComplete={onRecordSpeedRoundResult}
           onExit={() => setMode('solo')}
         />
+      ) : mode === 'debug' ? (
+        <DebugCodeMode
+          onComplete={onRecordDebugChallengeResult}
+          onExit={() => setMode('solo')}
+        />
       ) : (
         <>
       {isChallengeFromFriend && phase !== 'result' && (
@@ -234,6 +242,14 @@ export const BattleTab: React.FC<BattleTabProps> = ({
             >
               <Zap className="w-4 h-4" />
               <span>Speed Round (60s True/False)</span>
+            </button>
+
+            <button
+              onClick={() => setMode('debug')}
+              className="w-full py-3 px-4 rounded-xl font-bold text-sm border-2 border-danger text-danger hover:bg-danger/10 transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Bug className="w-4 h-4" />
+              <span>Debug the Code</span>
             </button>
 
             <button

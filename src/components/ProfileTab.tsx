@@ -6,7 +6,7 @@ import { loadLeaderboard } from '../store/firestoreStore';
 import { getOrCreateUid } from '../store/localStore';
 import { SkillTree } from './SkillTree';
 import { BadgesPanel } from './BadgesPanel';
-import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp, Snowflake, Trophy } from 'lucide-react';
+import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp, Snowflake, Trophy, Bug } from 'lucide-react';
 
 interface ProfileTabProps {
   profile: LocalProfile;
@@ -317,6 +317,16 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
             </div>
             <span className="font-bold text-textPrimary">
               {profile.stats.speedRoundBestScore} ({profile.stats.speedRoundsPlayed} played)
+            </span>
+          </div>
+
+          <div className="py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-textSecondary">
+              <Bug className="w-4 h-4 text-danger" />
+              <span>Debug Challenges Solved</span>
+            </div>
+            <span className="font-bold text-textPrimary">
+              {profile.stats.debugChallengesSolved} / {profile.stats.debugChallengesAttempted}
             </span>
           </div>
         </div>

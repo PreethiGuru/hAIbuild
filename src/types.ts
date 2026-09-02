@@ -79,6 +79,8 @@ export interface LocalProfile {
     mlQaViewedCount: number;
     speedRoundsPlayed: number;
     speedRoundBestScore: number;
+    debugChallengesAttempted: number;
+    debugChallengesSolved: number;
   };
 }
 
@@ -87,6 +89,11 @@ export interface SpeedRoundResult {
   totalAnswered: number;
   xpEarned: number;
   isNewBest: boolean;
+}
+
+export interface DebugChallengeResult {
+  correct: boolean;
+  xpEarned: number;
 }
 
 export interface LeaderboardEntry {

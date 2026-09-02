@@ -18,6 +18,7 @@ export default function App() {
     markContentViewed,
     recordBattleResult,
     recordSpeedRoundResult,
+    recordDebugChallengeResult,
   } = useDataStore();
 
   if (loading) {
@@ -54,6 +55,7 @@ export default function App() {
               streakCount={profile.streakCount}
               onRecordResult={(won, diff) => recordBattleResult(won, diff)}
               onRecordSpeedRoundResult={(correct, total) => recordSpeedRoundResult(correct, total)}
+              onRecordDebugChallengeResult={(correct) => recordDebugChallengeResult(correct)}
             />
           )}
 

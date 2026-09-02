@@ -39,6 +39,8 @@ export const DEFAULT_PROFILE: LocalProfile = {
     mlQaViewedCount: 0,
     speedRoundsPlayed: 0,
     speedRoundBestScore: 0,
+    debugChallengesAttempted: 0,
+    debugChallengesSolved: 0,
   },
 };
 

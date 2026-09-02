@@ -1,6 +1,6 @@
 import { collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { BattleResult, DailyProgress, InterviewDifficulty, LeaderboardEntry, LocalProfile, SpeedRoundResult } from '../types';
+import { BattleResult, DailyProgress, DebugChallengeResult, InterviewDifficulty, LeaderboardEntry, LocalProfile, SpeedRoundResult } from '../types';
 import {
   DEFAULT_DAILY_PROGRESS,
   DEFAULT_PROFILE,
@@ -234,4 +234,33 @@ export async function recordSpeedRoundResult(
 
   await saveProfile(updatedProfile);
   return { correctCount, totalAnswered, xpEarned, isNewBest };
+}
+
+const DEBUG_CHALLENGE_XP = 10;
+
+export async function recordDebugChallengeResult(correct: boolean): Promise<DebugChallengeResult> {
+  const profile = await loadProfile();
+  const todayStr = getTodayDateString();
+  const yesterdayStr = getYesterdayDateString();
+  const streakUpdate = advanceStreak(profile, todayStr, yesterdayStr);
+
+  const xpEarned = correct ? DEBUG_CHALLENGE_XP : 0;
+  const newXp = profile.xp + xpEarned;
+  const newLevel = Math.floor(newXp / 100) + 1;
+
+  const updatedProfile: LocalProfile = {
+    ...profile,
+    ...streakUpdate,
+    lastActivityDate: todayStr,
+    xp: newXp,
+    level: newLevel,
+    stats: {
+      ...profile.stats,
+      debugChallengesAttempted: profile.stats.debugChallengesAttempted + 1,
+      debugChallengesSolved: profile.stats.debugChallengesSolved + (correct ? 1 : 0),
+    },
+  };
+
+  await saveProfile(updatedProfile);
+  return { correct, xpEarned };
 }
