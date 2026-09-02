@@ -529,3 +529,11 @@ export function getRandomBattleQuestion(): MlInterviewQaQuestion {
 export function getBattleQuestionById(id: string): MlInterviewQaQuestion | undefined {
   return ML_INTERVIEW_QUESTIONS.find((q) => q.id === id);
 }
+
+export function getRandomBattleQuestionByDifficulty(
+  difficulty: MlInterviewQaQuestion['difficulty']
+): MlInterviewQaQuestion {
+  const pool = ML_INTERVIEW_QUESTIONS.filter((q) => q.difficulty === difficulty);
+  const source = pool.length > 0 ? pool : ML_INTERVIEW_QUESTIONS;
+  return source[Math.floor(Math.random() * source.length)];
+}

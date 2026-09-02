@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BattleResult, InterviewDifficulty, MlInterviewQaQuestion } from '../types';
-import { getBattleQuestionById, getRandomBattleQuestion } from '../data/questions';
+import { getBattleQuestionById, getRandomBattleQuestion, getRandomBattleQuestionByDifficulty } from '../data/questions';
 import { checkHasGemini, generateAIBattleQuestion } from '../ai/gemini';
-import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check } from 'lucide-react';
+import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check, Crown } from 'lucide-react';
+
+const BOSS_FIGHT_STREAK_THRESHOLD = 3;
 
 interface BattleTabProps {
   currentRating: number;
+  streakCount: number;
   onRecordResult: (won: boolean, difficulty?: InterviewDifficulty) => Promise<BattleResult>;
 }
 
 type BattlePhase = 'idle' | 'active' | 'result';
 
-export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, onRecordResult }) => {
+export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, streakCount, onRecordResult }) => {
   const [phase, setPhase] = useState<BattlePhase>('idle');
   const [currentQuestion, setCurrentQuestion] = useState<MlInterviewQaQuestion>(getRandomBattleQuestion);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -22,6 +25,8 @@ export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, onRecordRes
   const [aiError, setAiError] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState<boolean>(false);
   const [isChallengeFromFriend, setIsChallengeFromFriend] = useState<boolean>(false);
+  const [isBossFight, setIsBossFight] = useState<boolean>(false);
+  const bossFightUnlocked = streakCount >= BOSS_FIGHT_STREAK_THRESHOLD;
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -74,12 +79,17 @@ export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, onRecordRes
     };
   }, [phase]);
 
-  const handleStartBattle = (questionToUse?: MlInterviewQaQuestion) => {
+  const handleStartBattle = (questionToUse?: MlInterviewQaQuestion, bossFight = false) => {
     const q = questionToUse || getRandomBattleQuestion();
     setCurrentQuestion(q);
     setSelectedOption(null);
     setBattleResult(null);
+    setIsBossFight(bossFight);
     setPhase('active');
+  };
+
+  const handleStartBossFight = () => {
+    handleStartBattle(getRandomBattleQuestionByDifficulty('senior'), true);
   };
 
   const handleGenerateAiQuestion = async () => {
@@ -145,6 +155,13 @@ export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, onRecordRes
         </div>
       )}
 
+      {isBossFight && phase !== 'idle' && (
+        <div className="bg-warning/10 border border-warning/40 rounded-xl p-3 flex items-center gap-2 text-xs text-warning font-bold uppercase tracking-wider">
+          <Crown className="w-4 h-4 shrink-0" />
+          <span>Boss Fight</span>
+        </div>
+      )}
+
       {/* PHASE 1: IDLE */}
       {phase === 'idle' && (
         <div className="bg-surface border border-border rounded-2xl p-6 text-center space-y-6 shadow-xl">
@@ -194,6 +211,28 @@ export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, onRecordRes
                 )}
               </button>
             )}
+
+            <button
+              onClick={handleStartBossFight}
+              disabled={!bossFightUnlocked}
+              title={
+                bossFightUnlocked
+                  ? undefined
+                  : `Reach a ${BOSS_FIGHT_STREAK_THRESHOLD}-day streak to unlock`
+              }
+              className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 ${
+                bossFightUnlocked
+                  ? 'border-2 border-warning text-warning hover:bg-warning/10 cursor-pointer'
+                  : 'border-2 border-border text-textMuted cursor-not-allowed opacity-60'
+              }`}
+            >
+              <Crown className="w-4 h-4" />
+              <span>
+                {bossFightUnlocked
+                  ? 'Boss Fight (Senior Question)'
+                  : `Boss Fight -- ${BOSS_FIGHT_STREAK_THRESHOLD}-day streak to unlock`}
+              </span>
+            </button>
           </div>
         </div>
       )}

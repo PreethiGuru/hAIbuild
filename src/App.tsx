@@ -50,6 +50,7 @@ export default function App() {
           {activeTab === 'battle' && (
             <BattleTab
               currentRating={profile.rating}
+              streakCount={profile.streakCount}
               onRecordResult={(won, diff) => recordBattleResult(won, diff)}
             />
           )}
