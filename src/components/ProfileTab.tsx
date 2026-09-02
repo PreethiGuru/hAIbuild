@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LeaderboardEntry, LocalProfile } from '../types';
-import { PenguinMascot } from './PenguinMascot/PenguinMascot';
+import { PenguinMascot, EVOLUTION_TIER_NAMES, getEvolutionTier } from './PenguinMascot/PenguinMascot';
 import { checkHasGemini, fetchAIDailySummary } from '../ai/gemini';
 import { loadLeaderboard } from '../store/firestoreStore';
 import { getOrCreateUid } from '../store/localStore';
@@ -86,11 +86,11 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
             </span>
             <span className="text-xs text-textSecondary">{profile.xp} XP</span>
           </div>
-          <h1 className="text-xl font-bold text-textPrimary">AIML Explorer</h1>
+          <h1 className="text-xl font-bold text-textPrimary">{EVOLUTION_TIER_NAMES[getEvolutionTier(profile.level)]} Penguin</h1>
           <p className="text-xs text-textMuted">Consistent Daily Learner</p>
         </div>
         <div className="w-16 h-16 rounded-2xl bg-surfaceHigh border border-border flex items-center justify-center shadow-inner">
-          <PenguinMascot state="idle" size="small" />
+          <PenguinMascot state="idle" size="small" level={profile.level} />
         </div>
       </div>
 
@@ -108,6 +108,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
         <PenguinMascot
           showMountain={true}
           progress={mountainProgress}
+          level={profile.level}
           className="shadow-xl"
         />
       </div>
@@ -196,7 +197,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
           {showSummaryCard && aiSummary && (
             <div className="p-4 bg-surface rounded-2xl border border-accent/50 shadow-xl flex gap-4 items-start animate-fade-in">
               <div className="shrink-0 pt-1">
-                <PenguinMascot state="walking" size="small" />
+                <PenguinMascot state="walking" size="small" level={profile.level} />
               </div>
               <div className="space-y-1 text-xs text-textPrimary">
                 <div className="flex items-center gap-1.5 font-bold text-accent">

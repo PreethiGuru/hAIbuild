@@ -7,6 +7,23 @@ interface PenguinMascotProps {
   className?: string;
   showMountain?: boolean;
   progress?: number; // 0 to 100
+  level?: number;
+}
+
+export type EvolutionTier = 0 | 1 | 2 | 3;
+
+export const EVOLUTION_TIER_NAMES: Record<EvolutionTier, string> = {
+  0: 'Hatchling',
+  1: 'Scholar',
+  2: 'Practitioner',
+  3: 'Master',
+};
+
+export function getEvolutionTier(level: number): EvolutionTier {
+  if (level >= 10) return 3;
+  if (level >= 6) return 2;
+  if (level >= 3) return 1;
+  return 0;
 }
 
 export const PenguinMascot: React.FC<PenguinMascotProps> = ({
@@ -15,7 +32,9 @@ export const PenguinMascot: React.FC<PenguinMascotProps> = ({
   className = '',
   showMountain = false,
   progress = 0,
+  level = 1,
 }) => {
+  const tier = getEvolutionTier(level);
   const widthMap: Record<MascotSize, number> = {
     small: 80,
     medium: 120,
@@ -136,6 +155,37 @@ export const PenguinMascot: React.FC<PenguinMascotProps> = ({
           {/* Cheek Blushes */}
           <ellipse cx="23" cy="36" rx="3.5" ry="2" fill="#FF6B6B" opacity="0.4" />
           <ellipse cx="57" cy="36" rx="3.5" ry="2" fill="#FF6B6B" opacity="0.4" />
+
+          {/* Evolution gear: Scholar (graduation cap) at tier 1-2 */}
+          {(tier === 1 || tier === 2) && (
+            <g>
+              <rect x="29" y="7" width="22" height="5" rx="2" fill="#1E90FF" />
+              <polygon points="40,-3 60,4.5 40,12 20,4.5" fill="#161E2E" />
+              <line x1="60" y1="4.5" x2="60" y2="14" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="60" cy="15.5" r="2" fill="#F59E0B" />
+            </g>
+          )}
+
+          {/* Evolution gear: Practitioner scarf at tier 2 */}
+          {tier === 2 && (
+            <g>
+              <path d="M 17 52 Q 40 63 63 52 L 63 58 Q 40 69 17 58 Z" fill="#F59E0B" />
+              <rect x="43" y="56" width="7" height="15" rx="2.5" fill="#F59E0B" />
+            </g>
+          )}
+
+          {/* Evolution gear: Master crown at tier 3 (replaces cap) */}
+          {tier === 3 && (
+            <g>
+              <rect x="27" y="9" width="26" height="6" rx="1.5" fill="#F59E0B" />
+              <polygon points="29,9 34,-4 39,9" fill="#F59E0B" />
+              <polygon points="35,9 40,-8 45,9" fill="#F59E0B" />
+              <polygon points="41,9 46,-4 51,9" fill="#F59E0B" />
+              <circle cx="34" cy="-4" r="1.8" fill="#FFD700" />
+              <circle cx="40" cy="-8" r="2" fill="#FFD700" />
+              <circle cx="46" cy="-4" r="1.8" fill="#FFD700" />
+            </g>
+          )}
         </g>
       </svg>
     );

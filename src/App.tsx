@@ -46,6 +46,7 @@ export default function App() {
               todayDate={todayDate}
               dailyProgress={dailyProgress}
               onMarkDone={(key) => markContentViewed(todayDate, key)}
+              level={profile.level}
             />
           )}
 

@@ -10,12 +10,14 @@ interface TodayTabProps {
   todayDate: string;
   dailyProgress: DailyProgress;
   onMarkDone: (key: keyof DailyProgress) => Promise<{ surpriseXp?: number } | void>;
+  level: number;
 }
 
 export const TodayTab: React.FC<TodayTabProps> = ({
   todayDate,
   dailyProgress,
   onMarkDone,
+  level,
 }) => {
   const dailySet = getDailyQuestionsForDate(todayDate);
 
@@ -101,6 +103,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
           <PenguinMascot
             state={allDone ? 'celebrating' : 'idle'}
             size="small"
+            level={level}
           />
         </div>
       </div>
