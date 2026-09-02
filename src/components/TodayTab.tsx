@@ -3,12 +3,12 @@ import { getDailyQuestionsForDate } from '../data/questions';
 import { DailyProgress } from '../types';
 import { PenguinMascot } from './PenguinMascot/PenguinMascot';
 import { fetchAIElaboration, fetchAIHint, checkHasGemini } from '../ai/gemini';
-import { Sparkles, CheckCircle2, ChevronDown, ChevronUp, Lightbulb, Bot, AlertCircle, BookOpen, Code2, MessageSquare } from 'lucide-react';
+import { Sparkles, CheckCircle2, ChevronDown, ChevronUp, Lightbulb, Bot, AlertCircle, BookOpen, Code2, MessageSquare, Gift } from 'lucide-react';
 
 interface TodayTabProps {
   todayDate: string;
   dailyProgress: DailyProgress;
-  onMarkDone: (key: keyof DailyProgress) => void;
+  onMarkDone: (key: keyof DailyProgress) => Promise<{ surpriseXp?: number } | void>;
 }
 
 export const TodayTab: React.FC<TodayTabProps> = ({
@@ -28,10 +28,19 @@ export const TodayTab: React.FC<TodayTabProps> = ({
   const [showElaborateCard, setShowElaborateCard] = useState<boolean>(false);
 
   const [aiError, setAiError] = useState<string | null>(null);
+  const [surpriseXp, setSurpriseXp] = useState<number | null>(null);
 
   useEffect(() => {
     checkHasGemini().then(setHasGemini);
   }, []);
+
+  const handleMarkDone = async (key: keyof DailyProgress) => {
+    const result = await onMarkDone(key);
+    if (result?.surpriseXp) {
+      setSurpriseXp(result.surpriseXp);
+      setTimeout(() => setSurpriseXp(null), 3500);
+    }
+  };
 
   const allDone = dailyProgress.dsa && dailyProgress.ml_concept && dailyProgress.ml_interview_qa;
 
@@ -94,6 +103,14 @@ export const TodayTab: React.FC<TodayTabProps> = ({
           />
         </div>
       </div>
+
+      {/* Daily Surprise Drop Toast */}
+      {surpriseXp && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-accent text-white px-4 py-2 rounded-full shadow-xl flex items-center gap-2 text-sm font-bold animate-fade-in">
+          <Gift className="w-4 h-4" />
+          Surprise! +{surpriseXp} bonus XP
+        </div>
+      )}
 
       {/* All Done Banner */}
       {allDone && (
@@ -250,7 +267,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 
         {/* Action Button */}
         <button
-          onClick={() => onMarkDone('dsa')}
+          onClick={() => handleMarkDone('dsa')}
           disabled={dailyProgress.dsa}
           className={`w-full py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
             dailyProgress.dsa
@@ -322,7 +339,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 
         {/* Action Button */}
         <button
-          onClick={() => onMarkDone('ml_concept')}
+          onClick={() => handleMarkDone('ml_concept')}
           disabled={dailyProgress.ml_concept}
           className={`w-full py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
             dailyProgress.ml_concept
@@ -416,7 +433,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 
         {/* Action Button */}
         <button
-          onClick={() => onMarkDone('ml_interview_qa')}
+          onClick={() => handleMarkDone('ml_interview_qa')}
           disabled={dailyProgress.ml_interview_qa}
           className={`w-full py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
             dailyProgress.ml_interview_qa

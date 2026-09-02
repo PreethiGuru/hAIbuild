@@ -35,10 +35,10 @@ export function useDataStore() {
 
   const markContentViewed = useCallback(
     async (dateStr: string, key: keyof DailyProgress) => {
-      const { updatedProgress, updatedProfile } = await markContentAsViewed(dateStr, key);
+      const { updatedProgress, updatedProfile, surpriseXp } = await markContentAsViewed(dateStr, key);
       setDailyProgress(updatedProgress);
       setProfile(updatedProfile);
-      return updatedProgress;
+      return { surpriseXp };
     },
     []
   );

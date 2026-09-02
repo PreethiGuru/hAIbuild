@@ -99,10 +99,13 @@ export async function saveDailyProgress(dateStr: string, progress: DailyProgress
   await setDoc(dailyProgressRef(uid, dateStr), progress);
 }
 
+const SURPRISE_DROP_CHANCE = 0.2;
+const SURPRISE_DROP_XP = 15;
+
 export async function markContentAsViewed(
   dateStr: string,
   key: keyof DailyProgress
-): Promise<{ updatedProgress: DailyProgress; updatedProfile: LocalProfile }> {
+): Promise<{ updatedProgress: DailyProgress; updatedProfile: LocalProfile; surpriseXp?: number }> {
   const currentProgress = await loadDailyProgress(dateStr);
   if (currentProgress[key]) {
     return { updatedProgress: currentProgress, updatedProfile: await loadProfile() };
@@ -116,7 +119,8 @@ export async function markContentAsViewed(
   const yesterdayStr = getYesterdayDateString();
   const streakUpdate = advanceStreak(profile, todayStr, yesterdayStr);
 
-  const newXp = profile.xp + 10;
+  const gotSurpriseDrop = Math.random() < SURPRISE_DROP_CHANCE;
+  const newXp = profile.xp + 10 + (gotSurpriseDrop ? SURPRISE_DROP_XP : 0);
   const newLevel = Math.floor(newXp / 100) + 1;
 
   const newStats = { ...profile.stats };
@@ -134,7 +138,11 @@ export async function markContentAsViewed(
   };
 
   await saveProfile(updatedProfile);
-  return { updatedProgress, updatedProfile };
+  return {
+    updatedProgress,
+    updatedProfile,
+    surpriseXp: gotSurpriseDrop ? SURPRISE_DROP_XP : undefined,
+  };
 }
 
 export async function recordBattleResult(
