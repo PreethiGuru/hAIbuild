@@ -37,6 +37,8 @@ export const DEFAULT_PROFILE: LocalProfile = {
     dsaSolvedCount: 0,
     mlConceptsViewedCount: 0,
     mlQaViewedCount: 0,
+    speedRoundsPlayed: 0,
+    speedRoundBestScore: 0,
   },
 };
 

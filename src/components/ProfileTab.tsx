@@ -309,6 +309,16 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
               {profile.stats.battlesWon} W / {profile.stats.battlesLost} L
             </span>
           </div>
+
+          <div className="py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-textSecondary">
+              <Zap className="w-4 h-4 text-accent2" />
+              <span>Speed Round Best Score</span>
+            </div>
+            <span className="font-bold text-textPrimary">
+              {profile.stats.speedRoundBestScore} ({profile.stats.speedRoundsPlayed} played)
+            </span>
+          </div>
         </div>
       </div>
     </div>

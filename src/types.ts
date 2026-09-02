@@ -77,7 +77,16 @@ export interface LocalProfile {
     dsaSolvedCount: number;
     mlConceptsViewedCount: number;
     mlQaViewedCount: number;
+    speedRoundsPlayed: number;
+    speedRoundBestScore: number;
   };
+}
+
+export interface SpeedRoundResult {
+  correctCount: number;
+  totalAnswered: number;
+  xpEarned: number;
+  isNewBest: boolean;
 }
 
 export interface LeaderboardEntry {

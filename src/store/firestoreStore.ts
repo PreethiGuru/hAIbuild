@@ -1,6 +1,6 @@
 import { collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { BattleResult, DailyProgress, InterviewDifficulty, LeaderboardEntry, LocalProfile } from '../types';
+import { BattleResult, DailyProgress, InterviewDifficulty, LeaderboardEntry, LocalProfile, SpeedRoundResult } from '../types';
 import {
   DEFAULT_DAILY_PROGRESS,
   DEFAULT_PROFILE,
@@ -201,4 +201,37 @@ export async function loadLeaderboard(limitCount: number = 10): Promise<Leaderbo
       level: data.level ?? 1,
     };
   });
+}
+
+const SPEED_ROUND_XP_PER_CORRECT = 2;
+
+export async function recordSpeedRoundResult(
+  correctCount: number,
+  totalAnswered: number
+): Promise<SpeedRoundResult> {
+  const profile = await loadProfile();
+  const todayStr = getTodayDateString();
+  const yesterdayStr = getYesterdayDateString();
+  const streakUpdate = advanceStreak(profile, todayStr, yesterdayStr);
+
+  const xpEarned = correctCount * SPEED_ROUND_XP_PER_CORRECT;
+  const newXp = profile.xp + xpEarned;
+  const newLevel = Math.floor(newXp / 100) + 1;
+  const isNewBest = correctCount > profile.stats.speedRoundBestScore;
+
+  const updatedProfile: LocalProfile = {
+    ...profile,
+    ...streakUpdate,
+    lastActivityDate: todayStr,
+    xp: newXp,
+    level: newLevel,
+    stats: {
+      ...profile.stats,
+      speedRoundsPlayed: profile.stats.speedRoundsPlayed + 1,
+      speedRoundBestScore: Math.max(profile.stats.speedRoundBestScore, correctCount),
+    },
+  };
+
+  await saveProfile(updatedProfile);
+  return { correctCount, totalAnswered, xpEarned, isNewBest };
 }

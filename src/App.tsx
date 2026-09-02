@@ -17,6 +17,7 @@ export default function App() {
     refreshProfile,
     markContentViewed,
     recordBattleResult,
+    recordSpeedRoundResult,
   } = useDataStore();
 
   if (loading) {
@@ -52,6 +53,7 @@ export default function App() {
               currentRating={profile.rating}
               streakCount={profile.streakCount}
               onRecordResult={(won, diff) => recordBattleResult(won, diff)}
+              onRecordSpeedRoundResult={(correct, total) => recordSpeedRoundResult(correct, total)}
             />
           )}
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BattleResult, InterviewDifficulty, MlInterviewQaQuestion } from '../types';
+import { BattleResult, InterviewDifficulty, MlInterviewQaQuestion, SpeedRoundResult } from '../types';
 import { getBattleQuestionById, getRandomBattleQuestion, getRandomBattleQuestionByDifficulty } from '../data/questions';
 import { checkHasGemini, generateAIBattleQuestion } from '../ai/gemini';
-import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check, Crown } from 'lucide-react';
+import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check, Crown, Zap } from 'lucide-react';
+import { SpeedRoundMode } from './SpeedRoundMode';
 
 const BOSS_FIGHT_STREAK_THRESHOLD = 3;
 
@@ -10,11 +11,19 @@ interface BattleTabProps {
   currentRating: number;
   streakCount: number;
   onRecordResult: (won: boolean, difficulty?: InterviewDifficulty) => Promise<BattleResult>;
+  onRecordSpeedRoundResult: (correctCount: number, totalAnswered: number) => Promise<SpeedRoundResult>;
 }
 
 type BattlePhase = 'idle' | 'active' | 'result';
+type BattleMode = 'solo' | 'speed';
 
-export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, streakCount, onRecordResult }) => {
+export const BattleTab: React.FC<BattleTabProps> = ({
+  currentRating,
+  streakCount,
+  onRecordResult,
+  onRecordSpeedRoundResult,
+}) => {
+  const [mode, setMode] = useState<BattleMode>('solo');
   const [phase, setPhase] = useState<BattlePhase>('idle');
   const [currentQuestion, setCurrentQuestion] = useState<MlInterviewQaQuestion>(getRandomBattleQuestion);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -148,6 +157,13 @@ export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, streakCount
         </div>
       </div>
 
+      {mode === 'speed' ? (
+        <SpeedRoundMode
+          onComplete={onRecordSpeedRoundResult}
+          onExit={() => setMode('solo')}
+        />
+      ) : (
+        <>
       {isChallengeFromFriend && phase !== 'result' && (
         <div className="bg-accent/10 border border-accent/40 rounded-xl p-3 flex items-center gap-2 text-xs text-accent font-semibold">
           <Link2 className="w-4 h-4 shrink-0" />
@@ -211,6 +227,14 @@ export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, streakCount
                 )}
               </button>
             )}
+
+            <button
+              onClick={() => setMode('speed')}
+              className="w-full py-3 px-4 rounded-xl font-bold text-sm border-2 border-accent2 text-accent2 hover:bg-accent2/10 transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Zap className="w-4 h-4" />
+              <span>Speed Round (60s True/False)</span>
+            </button>
 
             <button
               onClick={handleStartBossFight}
@@ -411,6 +435,8 @@ export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, streakCount
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
+      )}
+        </>
       )}
     </div>
   );
