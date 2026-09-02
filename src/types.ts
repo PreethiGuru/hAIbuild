@@ -124,6 +124,20 @@ export interface MatrixRoundResult {
   isNewBest: boolean;
 }
 
+export interface DuelPlayerResult {
+  won: boolean;
+  timeMs: number;
+}
+
+export interface DuelData {
+  id: string;
+  questionId: string;
+  creatorUid: string;
+  creatorResult: DuelPlayerResult | null;
+  opponentUid: string | null;
+  opponentResult: DuelPlayerResult | null;
+}
+
 export interface LeaderboardEntry {
   uid: string;
   rating: number;

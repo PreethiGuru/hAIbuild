@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BattleResult, DebugChallengeResult, InterviewDifficulty, MatrixRoundResult, MlInterviewQaQuestion, SpeedRoundResult } from '../types';
+import { BattleResult, DebugChallengeResult, DuelData, InterviewDifficulty, MatrixRoundResult, MlInterviewQaQuestion, SpeedRoundResult } from '../types';
 import { getBattleQuestionById, getRandomBattleQuestion, getRandomBattleQuestionByDifficulty } from '../data/questions';
 import { checkHasGemini, generateAIBattleQuestion } from '../ai/gemini';
-import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check, Crown, Zap, Bug, Grid3x3 } from 'lucide-react';
+import { createDuel, submitDuelResult } from '../store/firestoreStore';
+import { getOrCreateUid } from '../store/localStore';
+import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check, Crown, Zap, Bug, Grid3x3, Hourglass } from 'lucide-react';
 import { SpeedRoundMode } from './SpeedRoundMode';
 import { DebugCodeMode } from './DebugCodeMode';
 import { MatrixMode } from './MatrixMode';
@@ -41,6 +43,9 @@ export const BattleTab: React.FC<BattleTabProps> = ({
   const [linkCopied, setLinkCopied] = useState<boolean>(false);
   const [isChallengeFromFriend, setIsChallengeFromFriend] = useState<boolean>(false);
   const [isBossFight, setIsBossFight] = useState<boolean>(false);
+  const [duelId, setDuelId] = useState<string | null>(null);
+  const [duelResult, setDuelResult] = useState<DuelData | null>(null);
+  const [lastAnswerTimeMs, setLastAnswerTimeMs] = useState<number>(0);
   const bossFightUnlocked = streakCount >= BOSS_FIGHT_STREAK_THRESHOLD;
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -50,19 +55,37 @@ export const BattleTab: React.FC<BattleTabProps> = ({
   }, []);
 
   useEffect(() => {
-    const challengeId = new URLSearchParams(window.location.search).get('challenge');
+    const params = new URLSearchParams(window.location.search);
+    const challengeId = params.get('challenge');
+    const incomingDuelId = params.get('duel');
     if (!challengeId) return;
     const challengeQuestion = getBattleQuestionById(challengeId);
     if (challengeQuestion) {
       setIsChallengeFromFriend(true);
+      if (incomingDuelId) setDuelId(incomingDuelId);
       handleStartBattle(challengeQuestion);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleShareChallenge = async () => {
-    const url = `${window.location.origin}${window.location.pathname}?challenge=${currentQuestion.id}`;
+    // A duel turns the shared link into a head-to-head comparison, but it's an
+    // enhancement, not a requirement -- if creating it fails for any reason,
+    // the plain challenge link (which needs no Firestore write at all) must
+    // still work, exactly as it did before duels existed.
+    let duelParam = '';
     try {
+      const { duelId: newDuelId } = await createDuel(currentQuestion.id);
+      if (battleResult) {
+        await submitDuelResult(newDuelId, battleResult.won, lastAnswerTimeMs);
+      }
+      duelParam = `&duel=${newDuelId}`;
+    } catch (e) {
+      console.error('Could not create a duel for this challenge -- sharing a plain link instead:', e);
+    }
+
+    try {
+      const url = `${window.location.origin}${window.location.pathname}?challenge=${currentQuestion.id}${duelParam}`;
       await navigator.clipboard.writeText(url);
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2500);
@@ -120,23 +143,40 @@ export const BattleTab: React.FC<BattleTabProps> = ({
     }
   };
 
+  const finishDuelIfActive = async (won: boolean, elapsedMs: number) => {
+    if (!duelId) return;
+    try {
+      const updated = await submitDuelResult(duelId, won, elapsedMs);
+      if (updated?.creatorResult && updated?.opponentResult) {
+        setDuelResult(updated);
+      }
+    } catch (e) {
+      console.error('Failed to submit duel result:', e);
+    }
+  };
+
   const handleOptionSelect = async (optionIdx: number) => {
     if (phase !== 'active' || selectedOption !== null) return;
     if (timerRef.current) clearInterval(timerRef.current);
 
     setSelectedOption(optionIdx);
     const isCorrect = optionIdx === currentQuestion.battleFormat.correctOptionIndex;
+    const elapsedMs = (60 - timeLeft) * 1000;
+    setLastAnswerTimeMs(elapsedMs);
     const res = await onRecordResult(isCorrect, currentQuestion.difficulty);
     setBattleResult(res);
     setPhase('result');
+    await finishDuelIfActive(isCorrect, elapsedMs);
   };
 
   const handleTimeOut = async () => {
     if (selectedOption !== null) return;
     setSelectedOption(-1); // timeout marker
+    setLastAnswerTimeMs(60000);
     const res = await onRecordResult(false, currentQuestion.difficulty);
     setBattleResult(res);
     setPhase('result');
+    await finishDuelIfActive(false, 60000);
   };
 
   return (
@@ -389,6 +429,70 @@ export const BattleTab: React.FC<BattleTabProps> = ({
               </span>
             </div>
           </div>
+
+          {/* Duel Comparison (1v1 Battle Royale) */}
+          {duelResult && duelResult.creatorResult && duelResult.opponentResult && (() => {
+            const myUid = getOrCreateUid();
+            const isMeCreator = duelResult.creatorUid === myUid;
+            const mine = isMeCreator ? duelResult.creatorResult! : duelResult.opponentResult!;
+            const theirs = isMeCreator ? duelResult.opponentResult! : duelResult.creatorResult!;
+
+            let outcome: 'win' | 'lose' | 'tie';
+            if (mine.won && !theirs.won) outcome = 'win';
+            else if (!mine.won && theirs.won) outcome = 'lose';
+            else if (mine.timeMs !== theirs.timeMs) outcome = mine.timeMs < theirs.timeMs ? 'win' : 'lose';
+            else outcome = 'tie';
+
+            return (
+              <div
+                className={`rounded-xl border p-4 space-y-3 ${
+                  outcome === 'win'
+                    ? 'bg-success/10 border-success/40'
+                    : outcome === 'lose'
+                    ? 'bg-danger/10 border-danger/40'
+                    : 'bg-surfaceHigh border-border'
+                }`}
+              >
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-textMuted">
+                  <Swords className="w-3.5 h-3.5" />
+                  <span>1v1 Duel Result</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <div className="text-center flex-1">
+                    <div className="font-bold text-accent">You</div>
+                    <div className="text-textPrimary text-xs">
+                      {mine.won ? 'Correct' : 'Incorrect'} · {(mine.timeMs / 1000).toFixed(1)}s
+                    </div>
+                  </div>
+                  <div className="text-textMuted font-bold px-2 text-xs">VS</div>
+                  <div className="text-center flex-1">
+                    <div className="font-bold text-textSecondary">Opponent</div>
+                    <div className="text-textPrimary text-xs">
+                      {theirs.won ? 'Correct' : 'Incorrect'} · {(theirs.timeMs / 1000).toFixed(1)}s
+                    </div>
+                  </div>
+                </div>
+                <p
+                  className={`text-center text-sm font-bold ${
+                    outcome === 'win' ? 'text-success' : outcome === 'lose' ? 'text-danger' : 'text-textMuted'
+                  }`}
+                >
+                  {outcome === 'win'
+                    ? 'You won the duel!'
+                    : outcome === 'lose'
+                    ? 'Your opponent won this duel.'
+                    : "It's a tie!"}
+                </p>
+              </div>
+            );
+          })()}
+
+          {duelId && !duelResult && (
+            <div className="flex items-center gap-2 text-xs text-textMuted bg-surfaceHigh border border-border rounded-xl p-3">
+              <Hourglass className="w-4 h-4 shrink-0" />
+              <span>Duel sent. Once your opponent plays it, whoever answers second will see the head-to-head result.</span>
+            </div>
+          )}
 
           {/* Options Recap */}
           <div className="space-y-2.5">

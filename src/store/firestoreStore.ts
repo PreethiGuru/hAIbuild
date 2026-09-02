@@ -1,6 +1,6 @@
 import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { BattleResult, DailyProgress, DebugChallengeResult, GuildData, InterviewDifficulty, JoinGuildResult, LeaderboardEntry, LocalProfile, MatrixRoundResult, SpeedRoundResult } from '../types';
+import { BattleResult, DailyProgress, DebugChallengeResult, DuelData, GuildData, InterviewDifficulty, JoinGuildResult, LeaderboardEntry, LocalProfile, MatrixRoundResult, SpeedRoundResult } from '../types';
 import {
   DEFAULT_DAILY_PROGRESS,
   DEFAULT_PROFILE,
@@ -377,4 +377,63 @@ export async function recordMatrixRoundResult(
 
   await saveProfile(updatedProfile);
   return { timeMs, mistakes, xpEarned, isNewBest };
+}
+
+function duelRef(duelId: string) {
+  return doc(db, 'duels', duelId);
+}
+
+function generateDuelId(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export async function createDuel(questionId: string): Promise<{ duelId: string }> {
+  const uid = getOrCreateUid();
+  const duelId = generateDuelId();
+
+  await setDoc(duelRef(duelId), {
+    questionId,
+    creatorUid: uid,
+    creatorResult: null,
+    opponentUid: null,
+    opponentResult: null,
+  });
+
+  return { duelId };
+}
+
+/**
+ * Records the caller's result against a duel. Not transactional -- for a
+ * hackathon-scale, low-concurrency "share a link with one friend" flow, the
+ * read-then-write race window is an accepted simplification, not an oversight.
+ */
+export async function submitDuelResult(
+  duelId: string,
+  won: boolean,
+  timeMs: number
+): Promise<DuelData | null> {
+  const uid = getOrCreateUid();
+  const snap = await getDoc(duelRef(duelId));
+  if (!snap.exists()) return null;
+
+  const data = snap.data();
+  const isCreator = data.creatorUid === uid;
+  const result = { won, timeMs };
+
+  if (isCreator) {
+    await updateDoc(duelRef(duelId), { creatorResult: result });
+  } else {
+    await updateDoc(duelRef(duelId), { opponentUid: uid, opponentResult: result });
+  }
+
+  const updatedSnap = await getDoc(duelRef(duelId));
+  const updated = updatedSnap.data()!;
+  return {
+    id: duelId,
+    questionId: updated.questionId,
+    creatorUid: updated.creatorUid,
+    creatorResult: updated.creatorResult ?? null,
+    opponentUid: updated.opponentUid ?? null,
+    opponentResult: updated.opponentResult ?? null,
+  };
 }

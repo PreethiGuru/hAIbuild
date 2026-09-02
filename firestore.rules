@@ -23,5 +23,9 @@ service cloud.firestore {
     match /guilds/{code} {
       allow read, write: if true;
     }
+
+    match /duels/{duelId} {
+      allow read, write: if true;
+    }
   }
 }
