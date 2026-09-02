@@ -42,6 +42,8 @@ export const DEFAULT_PROFILE: LocalProfile = {
     speedRoundBestScore: 0,
     debugChallengesAttempted: 0,
     debugChallengesSolved: 0,
+    matrixRoundsCompleted: 0,
+    matrixBestTimeMs: 0,
   },
 };
 

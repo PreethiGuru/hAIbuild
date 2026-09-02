@@ -19,6 +19,7 @@ export default function App() {
     recordBattleResult,
     recordSpeedRoundResult,
     recordDebugChallengeResult,
+    recordMatrixRoundResult,
   } = useDataStore();
 
   if (loading) {
@@ -57,6 +58,7 @@ export default function App() {
               onRecordResult={(won, diff) => recordBattleResult(won, diff)}
               onRecordSpeedRoundResult={(correct, total) => recordSpeedRoundResult(correct, total)}
               onRecordDebugChallengeResult={(correct) => recordDebugChallengeResult(correct)}
+              onRecordMatrixRoundResult={(time, mistakes) => recordMatrixRoundResult(time, mistakes)}
             />
           )}
 

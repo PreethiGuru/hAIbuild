@@ -82,6 +82,8 @@ export interface LocalProfile {
     speedRoundBestScore: number;
     debugChallengesAttempted: number;
     debugChallengesSolved: number;
+    matrixRoundsCompleted: number;
+    matrixBestTimeMs: number;
   };
 }
 
@@ -113,6 +115,13 @@ export interface JoinGuildResult {
 export interface DebugChallengeResult {
   correct: boolean;
   xpEarned: number;
+}
+
+export interface MatrixRoundResult {
+  timeMs: number;
+  mistakes: number;
+  xpEarned: number;
+  isNewBest: boolean;
 }
 
 export interface LeaderboardEntry {

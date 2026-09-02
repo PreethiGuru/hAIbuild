@@ -1,6 +1,6 @@
 import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { BattleResult, DailyProgress, DebugChallengeResult, GuildData, InterviewDifficulty, JoinGuildResult, LeaderboardEntry, LocalProfile, SpeedRoundResult } from '../types';
+import { BattleResult, DailyProgress, DebugChallengeResult, GuildData, InterviewDifficulty, JoinGuildResult, LeaderboardEntry, LocalProfile, MatrixRoundResult, SpeedRoundResult } from '../types';
 import {
   DEFAULT_DAILY_PROGRESS,
   DEFAULT_PROFILE,
@@ -346,4 +346,35 @@ export async function loadMyGuild(): Promise<GuildData | null> {
     streakGoal: data.streakGoal ?? DEFAULT_GUILD_STREAK_GOAL,
     members,
   };
+}
+
+export async function recordMatrixRoundResult(
+  timeMs: number,
+  mistakes: number
+): Promise<MatrixRoundResult> {
+  const profile = await loadProfile();
+  const todayStr = getTodayDateString();
+  const yesterdayStr = getYesterdayDateString();
+  const streakUpdate = advanceStreak(profile, todayStr, yesterdayStr);
+
+  const xpEarned = Math.max(5, 20 - mistakes * 2);
+  const newXp = profile.xp + xpEarned;
+  const newLevel = Math.floor(newXp / 100) + 1;
+  const isNewBest = profile.stats.matrixBestTimeMs === 0 || timeMs < profile.stats.matrixBestTimeMs;
+
+  const updatedProfile: LocalProfile = {
+    ...profile,
+    ...streakUpdate,
+    lastActivityDate: todayStr,
+    xp: newXp,
+    level: newLevel,
+    stats: {
+      ...profile.stats,
+      matrixRoundsCompleted: profile.stats.matrixRoundsCompleted + 1,
+      matrixBestTimeMs: isNewBest ? timeMs : profile.stats.matrixBestTimeMs,
+    },
+  };
+
+  await saveProfile(updatedProfile);
+  return { timeMs, mistakes, xpEarned, isNewBest };
 }

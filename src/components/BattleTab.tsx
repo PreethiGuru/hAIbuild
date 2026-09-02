@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BattleResult, DebugChallengeResult, InterviewDifficulty, MlInterviewQaQuestion, SpeedRoundResult } from '../types';
+import { BattleResult, DebugChallengeResult, InterviewDifficulty, MatrixRoundResult, MlInterviewQaQuestion, SpeedRoundResult } from '../types';
 import { getBattleQuestionById, getRandomBattleQuestion, getRandomBattleQuestionByDifficulty } from '../data/questions';
 import { checkHasGemini, generateAIBattleQuestion } from '../ai/gemini';
-import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check, Crown, Zap, Bug } from 'lucide-react';
+import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check, Crown, Zap, Bug, Grid3x3 } from 'lucide-react';
 import { SpeedRoundMode } from './SpeedRoundMode';
 import { DebugCodeMode } from './DebugCodeMode';
+import { MatrixMode } from './MatrixMode';
 
 const BOSS_FIGHT_STREAK_THRESHOLD = 3;
 
@@ -14,10 +15,11 @@ interface BattleTabProps {
   onRecordResult: (won: boolean, difficulty?: InterviewDifficulty) => Promise<BattleResult>;
   onRecordSpeedRoundResult: (correctCount: number, totalAnswered: number) => Promise<SpeedRoundResult>;
   onRecordDebugChallengeResult: (correct: boolean) => Promise<DebugChallengeResult>;
+  onRecordMatrixRoundResult: (timeMs: number, mistakes: number) => Promise<MatrixRoundResult>;
 }
 
 type BattlePhase = 'idle' | 'active' | 'result';
-type BattleMode = 'solo' | 'speed' | 'debug';
+type BattleMode = 'solo' | 'speed' | 'debug' | 'matrix';
 
 export const BattleTab: React.FC<BattleTabProps> = ({
   currentRating,
@@ -25,6 +27,7 @@ export const BattleTab: React.FC<BattleTabProps> = ({
   onRecordResult,
   onRecordSpeedRoundResult,
   onRecordDebugChallengeResult,
+  onRecordMatrixRoundResult,
 }) => {
   const [mode, setMode] = useState<BattleMode>('solo');
   const [phase, setPhase] = useState<BattlePhase>('idle');
@@ -170,6 +173,11 @@ export const BattleTab: React.FC<BattleTabProps> = ({
           onComplete={onRecordDebugChallengeResult}
           onExit={() => setMode('solo')}
         />
+      ) : mode === 'matrix' ? (
+        <MatrixMode
+          onComplete={onRecordMatrixRoundResult}
+          onExit={() => setMode('solo')}
+        />
       ) : (
         <>
       {isChallengeFromFriend && phase !== 'result' && (
@@ -250,6 +258,14 @@ export const BattleTab: React.FC<BattleTabProps> = ({
             >
               <Bug className="w-4 h-4" />
               <span>Debug the Code</span>
+            </button>
+
+            <button
+              onClick={() => setMode('matrix')}
+              className="w-full py-3 px-4 rounded-xl font-bold text-sm border-2 border-accent2 text-accent2 hover:bg-accent2/10 transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Grid3x3 className="w-4 h-4" />
+              <span>Matrix Mode (Category Grid)</span>
             </button>
 
             <button

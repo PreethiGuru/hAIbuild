@@ -7,7 +7,7 @@ import { getOrCreateUid } from '../store/localStore';
 import { SkillTree } from './SkillTree';
 import { BadgesPanel } from './BadgesPanel';
 import { GuildCard } from './GuildCard';
-import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp, Snowflake, Trophy, Bug } from 'lucide-react';
+import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp, Snowflake, Trophy, Bug, Grid3x3 } from 'lucide-react';
 
 interface ProfileTabProps {
   profile: LocalProfile;
@@ -332,6 +332,18 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
             </div>
             <span className="font-bold text-textPrimary">
               {profile.stats.debugChallengesSolved} / {profile.stats.debugChallengesAttempted}
+            </span>
+          </div>
+
+          <div className="py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-textSecondary">
+              <Grid3x3 className="w-4 h-4 text-accent2" />
+              <span>Matrix Mode Best Time</span>
+            </div>
+            <span className="font-bold text-textPrimary">
+              {profile.stats.matrixBestTimeMs > 0
+                ? `${(profile.stats.matrixBestTimeMs / 1000).toFixed(1)}s`
+                : '--'}
             </span>
           </div>
         </div>
