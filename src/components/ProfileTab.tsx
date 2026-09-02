@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { LocalProfile } from '../types';
+import { LeaderboardEntry, LocalProfile } from '../types';
 import { PenguinMascot } from './PenguinMascot/PenguinMascot';
 import { checkHasGemini, fetchAIDailySummary } from '../ai/gemini';
-import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp } from 'lucide-react';
+import { loadLeaderboard } from '../store/firestoreStore';
+import { getOrCreateUid } from '../store/localStore';
+import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp, Snowflake, Trophy } from 'lucide-react';
 
 interface ProfileTabProps {
   profile: LocalProfile;
   onRefresh: () => void;
+}
+
+function daysUntil(dateStr: string | null): number {
+  if (!dateStr) return 0;
+  const target = new Date(dateStr + 'T00:00:00');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
 }
 
 export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) => {
@@ -14,10 +24,15 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [loadingSummary, setLoadingSummary] = useState<boolean>(false);
   const [showSummaryCard, setShowSummaryCard] = useState<boolean>(false);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState<boolean>(true);
 
   useEffect(() => {
     checkHasGemini().then(setHasGemini);
     onRefresh();
+    loadLeaderboard()
+      .then(setLeaderboard)
+      .finally(() => setLeaderboardLoading(false));
   }, [onRefresh]);
 
   // Calculate total questions solved/viewed for mountain climb progress (target 1,000)
@@ -121,6 +136,16 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
           </div>
           <div className="text-2xl font-bold text-textPrimary">{profile.streakCount} days</div>
           <div className="text-[10px] text-textMuted">Best: {profile.longestStreak} days</div>
+          <div
+            className={`inline-flex items-center gap-1 text-[10px] font-semibold ${
+              profile.freezeAvailable ? 'text-accent2' : 'text-textMuted'
+            }`}
+          >
+            <Snowflake className="w-3 h-3" />
+            {profile.freezeAvailable
+              ? 'Freeze ready'
+              : `Freeze in ${daysUntil(profile.nextFreezeAt)}d`}
+          </div>
         </div>
 
         {/* Elo Rating */}
@@ -182,6 +207,51 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
           )}
         </div>
       )}
+
+      {/* Leaderboard */}
+      <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-3">
+        <div className="flex items-center gap-2 text-warning">
+          <Trophy className="w-4 h-4" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-textMuted">
+            Leaderboard
+          </h3>
+        </div>
+
+        {leaderboardLoading ? (
+          <p className="text-xs text-textMuted py-2">Loading rankings...</p>
+        ) : leaderboard.length === 0 ? (
+          <p className="text-xs text-textMuted py-2">No ranked learners yet.</p>
+        ) : (
+          <div className="divide-y divide-borderFaint text-xs">
+            {leaderboard.map((entry, idx) => {
+              const isYou = entry.uid === getOrCreateUid();
+              return (
+                <div key={entry.uid} className="py-2.5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`w-5 text-center font-bold ${
+                        idx === 0 ? 'text-warning' : 'text-textMuted'
+                      }`}
+                    >
+                      {idx + 1}
+                    </span>
+                    <span className={isYou ? 'font-bold text-accent' : 'text-textSecondary'}>
+                      {isYou ? 'You' : `Learner ${entry.uid.slice(-4)}`}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-textMuted">
+                    <span className="flex items-center gap-1">
+                      <Flame className="w-3 h-3" />
+                      {entry.streakCount}
+                    </span>
+                    <span className="font-bold text-textPrimary">{entry.rating}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Detailed Learning Stats */}
       <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-3">

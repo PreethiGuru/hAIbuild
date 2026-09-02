@@ -28,6 +28,8 @@ export const DEFAULT_PROFILE: LocalProfile = {
   lastActivityDate: null,
   xp: 0,
   level: 1,
+  freezeAvailable: true,
+  nextFreezeAt: null,
   stats: {
     battlesPlayed: 0,
     battlesWon: 0,

@@ -68,6 +68,8 @@ export interface LocalProfile {
   lastActivityDate: string | null; // "YYYY-MM-DD"
   xp: number;
   level: number;
+  freezeAvailable: boolean;
+  nextFreezeAt: string | null; // "YYYY-MM-DD" -- when a used freeze becomes available again
   stats: {
     battlesPlayed: number;
     battlesWon: number;
@@ -76,6 +78,13 @@ export interface LocalProfile {
     mlConceptsViewedCount: number;
     mlQaViewedCount: number;
   };
+}
+
+export interface LeaderboardEntry {
+  uid: string;
+  rating: number;
+  streakCount: number;
+  level: number;
 }
 
 export interface DailyProgress {

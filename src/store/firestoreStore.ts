@@ -1,6 +1,6 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { BattleResult, DailyProgress, InterviewDifficulty, LocalProfile } from '../types';
+import { BattleResult, DailyProgress, InterviewDifficulty, LeaderboardEntry, LocalProfile } from '../types';
 import {
   DEFAULT_DAILY_PROGRESS,
   DEFAULT_PROFILE,
@@ -15,6 +15,56 @@ function profileRef(uid: string) {
 
 function dailyProgressRef(uid: string, dateStr: string) {
   return doc(db, 'users', uid, 'dailyProgress', dateStr);
+}
+
+function formatDateString(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Advances streak/longestStreak and freeze state for a new day of activity.
+ * A missed day only breaks the streak if no freeze is available; spending one
+ * schedules the next grant 7 days out. Shared by every activity that should
+ * count toward the daily streak (content viewed, battles played).
+ */
+function advanceStreak(
+  profile: LocalProfile,
+  todayStr: string,
+  yesterdayStr: string
+): Pick<LocalProfile, 'streakCount' | 'longestStreak' | 'freezeAvailable' | 'nextFreezeAt'> {
+  let streak = profile.streakCount;
+  let freezeAvailable = profile.freezeAvailable;
+  let nextFreezeAt = profile.nextFreezeAt;
+
+  if (profile.lastActivityDate !== todayStr) {
+    if (profile.lastActivityDate === yesterdayStr) {
+      streak += 1;
+    } else if (freezeAvailable && profile.streakCount > 0) {
+      // A day was missed, but a freeze covers it: streak continues uninterrupted.
+      streak += 1;
+      freezeAvailable = false;
+      const next = new Date();
+      next.setDate(next.getDate() + 7);
+      nextFreezeAt = formatDateString(next);
+    } else {
+      streak = 1;
+    }
+  }
+
+  if (!freezeAvailable && nextFreezeAt && todayStr >= nextFreezeAt) {
+    freezeAvailable = true;
+    nextFreezeAt = null;
+  }
+
+  return {
+    streakCount: streak,
+    longestStreak: Math.max(profile.longestStreak, streak),
+    freezeAvailable,
+    nextFreezeAt,
+  };
 }
 
 export async function loadProfile(): Promise<LocalProfile> {
@@ -64,13 +114,8 @@ export async function markContentAsViewed(
   const profile = await loadProfile();
   const todayStr = getTodayDateString();
   const yesterdayStr = getYesterdayDateString();
+  const streakUpdate = advanceStreak(profile, todayStr, yesterdayStr);
 
-  let streak = profile.streakCount;
-  if (profile.lastActivityDate !== todayStr) {
-    streak = profile.lastActivityDate === yesterdayStr ? streak + 1 : 1;
-  }
-
-  const longest = Math.max(profile.longestStreak, streak);
   const newXp = profile.xp + 10;
   const newLevel = Math.floor(newXp / 100) + 1;
 
@@ -81,8 +126,7 @@ export async function markContentAsViewed(
 
   const updatedProfile: LocalProfile = {
     ...profile,
-    streakCount: streak,
-    longestStreak: longest,
+    ...streakUpdate,
     lastActivityDate: todayStr,
     xp: newXp,
     level: newLevel,
@@ -115,17 +159,12 @@ export async function recordBattleResult(
 
   const todayStr = getTodayDateString();
   const yesterdayStr = getYesterdayDateString();
-
-  let streak = profile.streakCount;
-  if (profile.lastActivityDate !== todayStr) {
-    streak = profile.lastActivityDate === yesterdayStr ? streak + 1 : 1;
-  }
+  const streakUpdate = advanceStreak(profile, todayStr, yesterdayStr);
 
   const updatedProfile: LocalProfile = {
     ...profile,
     rating: newRating,
-    streakCount: streak,
-    longestStreak: Math.max(profile.longestStreak, streak),
+    ...streakUpdate,
     lastActivityDate: todayStr,
     xp: newXp,
     level: newLevel,
@@ -140,4 +179,18 @@ export async function recordBattleResult(
   await saveProfile(updatedProfile);
 
   return { won, oldRating, newRating, ratingDelta, xpEarned };
+}
+
+export async function loadLeaderboard(limitCount: number = 10): Promise<LeaderboardEntry[]> {
+  const q = query(collection(db, 'users'), orderBy('rating', 'desc'), limit(limitCount));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      uid: d.id,
+      rating: data.rating ?? 1200,
+      streakCount: data.streakCount ?? 0,
+      level: data.level ?? 1,
+    };
+  });
 }
