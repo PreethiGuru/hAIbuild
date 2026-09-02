@@ -7,7 +7,9 @@ import { getOrCreateUid } from '../store/localStore';
 import { SkillTree } from './SkillTree';
 import { BadgesPanel } from './BadgesPanel';
 import { GuildCard } from './GuildCard';
-import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp, Snowflake, Trophy, Bug, Grid3x3 } from 'lucide-react';
+import { ShopCard } from './ShopCard';
+import { WEEKS_FOR_YEAR_ACHIEVEMENT } from '../store/firestoreStore';
+import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp, Snowflake, Trophy, Bug, Grid3x3, Star } from 'lucide-react';
 
 interface ProfileTabProps {
   profile: LocalProfile;
@@ -142,13 +144,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
           <div className="text-[10px] text-textMuted">Best: {profile.longestStreak} days</div>
           <div
             className={`inline-flex items-center gap-1 text-[10px] font-semibold ${
-              profile.freezeAvailable ? 'text-accent2' : 'text-textMuted'
+              profile.streakFreezeCount > 0 ? 'text-accent2' : 'text-textMuted'
             }`}
           >
             <Snowflake className="w-3 h-3" />
-            {profile.freezeAvailable
-              ? 'Freeze ready'
-              : `Freeze in ${daysUntil(profile.nextFreezeAt)}d`}
+            {profile.streakFreezeCount > 0
+              ? `${profile.streakFreezeCount} freeze${profile.streakFreezeCount > 1 ? 's' : ''} ready`
+              : `Next freeze in ${daysUntil(profile.nextFreezeGrantAt)}d`}
           </div>
         </div>
 
@@ -212,6 +214,34 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
         </div>
       )}
 
+      {/* Shop */}
+      <ShopCard profile={profile} onProfileChange={onRefresh} />
+
+      {/* Year Achievement Progress */}
+      <div className="bg-surface p-4 rounded-2xl border border-border shadow space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-warning">
+            <Star className="w-4 h-4" />
+            <span className="text-xs font-bold uppercase tracking-wider text-textMuted">
+              Year Achievement
+            </span>
+          </div>
+          <span className="text-[10px] font-semibold text-textMuted">
+            {profile.weeklyQualifyingStreak} / {WEEKS_FOR_YEAR_ACHIEVEMENT} weeks
+          </span>
+        </div>
+        <div className="w-full h-2 bg-background rounded-full overflow-hidden border border-border">
+          <div
+            className="h-full bg-gradient-to-r from-warning to-accent transition-all duration-700"
+            style={{ width: `${Math.min(100, (profile.weeklyQualifyingStreak / WEEKS_FOR_YEAR_ACHIEVEMENT) * 100)}%` }}
+          />
+        </div>
+        <p className="text-[10px] text-textMuted">
+          Complete all 3 daily items on 5+ days, every week, for a full year to earn it.
+          {profile.yearAchievementCount > 0 && ` Earned ${profile.yearAchievementCount}x so far!`}
+        </p>
+      </div>
+
       {/* Guild */}
       <GuildCard profile={profile} onProfileChange={onRefresh} />
 
@@ -219,7 +249,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
       <SkillTree profile={profile} />
 
       {/* Badges */}
-      <BadgesPanel profile={profile} totalQuestions={totalQuestions} />
+      <BadgesPanel profile={profile} totalQuestions={totalQuestions} onProfileChange={onRefresh} />
 
       {/* Leaderboard */}
       <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-3">

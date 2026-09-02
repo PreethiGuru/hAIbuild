@@ -61,6 +61,8 @@ export interface MlInterviewQaQuestion {
   battleFormat: BattleFormat;
 }
 
+export const MAX_ITEM_STACK = 3;
+
 export interface LocalProfile {
   rating: number; // default 1200
   streakCount: number;
@@ -68,8 +70,14 @@ export interface LocalProfile {
   lastActivityDate: string | null; // "YYYY-MM-DD"
   xp: number;
   level: number;
-  freezeAvailable: boolean;
-  nextFreezeAt: string | null; // "YYYY-MM-DD" -- when a used freeze becomes available again
+  snowflakes: number;
+  streakFreezeCount: number; // 0-MAX_ITEM_STACK
+  xpBoosterCount: number; // 0-MAX_ITEM_STACK, each charge doubles the XP of your next earn
+  nextFreezeGrantAt: string | null; // "YYYY-MM-DD" -- next free weekly freeze grant, independent of purchases
+  claimedBadgeIds: string[];
+  weeklyQualifyingStreak: number; // consecutive weeks with all-3-days-done on >=5/7 days
+  lastReconciledWeekIndex: number | null;
+  yearAchievementCount: number; // times the 52-week achievement has been earned
   guildCode: string | null;
   stats: {
     battlesPlayed: number;
@@ -85,6 +93,21 @@ export interface LocalProfile {
     matrixRoundsCompleted: number;
     matrixBestTimeMs: number;
   };
+}
+
+export interface ShopPurchaseResult {
+  success: boolean;
+  error?: string;
+}
+
+export interface ClaimBadgeResult {
+  success: boolean;
+  snowflakesEarned: number;
+}
+
+export interface WeeklyReconcileResult {
+  weeksReconciled: number;
+  yearAchievementEarned: boolean;
 }
 
 export interface SpeedRoundResult {

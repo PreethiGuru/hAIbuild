@@ -9,6 +9,7 @@ import {
   recordDebugChallengeResult as recordDebugChallengeResultInFirestore,
   recordMatrixRoundResult as recordMatrixRoundResultInFirestore,
   recordSpeedRoundResult as recordSpeedRoundResultInFirestore,
+  reconcileWeeklyAchievement,
   saveProfile,
 } from './firestoreStore';
 
@@ -81,6 +82,12 @@ export function useDataStore() {
       setLoading(true);
       await Promise.all([refreshProfile(), refreshDailyProgress(todayDate)]);
       setLoading(false);
+      // Fire-and-forget: catches up any fully-elapsed, unscored weeks toward
+      // the Year Achievement. Cheap no-op most days; never blocks the UI.
+      const weeklyResult = await reconcileWeeklyAchievement();
+      if (weeklyResult.weeksReconciled > 0) {
+        refreshProfile();
+      }
     })();
   }, [refreshProfile, refreshDailyProgress, todayDate]);
 

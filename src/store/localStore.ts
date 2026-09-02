@@ -21,6 +21,36 @@ export function getYesterdayDateString(): string {
   return `${year}-${month}-${day}`;
 }
 
+export function formatDateString(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function getDateStringDaysAgo(daysAgo: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return formatDateString(d);
+}
+
+const MS_PER_DAY = 86400000;
+
+/** A simple, deterministic 7-day bucket index (not calendar-week-aligned). */
+export function getWeekIndex(dateStr: string): number {
+  const daysSinceEpoch = Math.floor(new Date(dateStr + 'T00:00:00Z').getTime() / MS_PER_DAY);
+  return Math.floor(daysSinceEpoch / 7);
+}
+
+export function getDatesForWeekIndex(weekIndex: number): string[] {
+  const dates: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const ms = (weekIndex * 7 + i) * MS_PER_DAY;
+    dates.push(new Date(ms).toISOString().slice(0, 10));
+  }
+  return dates;
+}
+
 export const DEFAULT_PROFILE: LocalProfile = {
   rating: 1200,
   streakCount: 0,
@@ -28,8 +58,14 @@ export const DEFAULT_PROFILE: LocalProfile = {
   lastActivityDate: null,
   xp: 0,
   level: 1,
-  freezeAvailable: true,
-  nextFreezeAt: null,
+  snowflakes: 0,
+  streakFreezeCount: 1,
+  xpBoosterCount: 0,
+  nextFreezeGrantAt: null,
+  claimedBadgeIds: [],
+  weeklyQualifyingStreak: 0,
+  lastReconciledWeekIndex: null,
+  yearAchievementCount: 0,
   guildCode: null,
   stats: {
     battlesPlayed: 0,
