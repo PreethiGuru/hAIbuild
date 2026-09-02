@@ -22,9 +22,9 @@ export const Header: React.FC<HeaderProps> = ({ streakCount }) => {
         </div>
         <div>
           <span className="text-sm font-extrabold tracking-tight text-textPrimary block leading-none">
-            AIDailyHabit
+            hAIbuild
           </span>
-          <span className="text-[10px] text-textSecondary font-medium">AIML Interview Prep</span>
+          <span className="text-[10px] text-textSecondary font-medium">Daily AI/ML Fluency</span>
         </div>
       </div>
 

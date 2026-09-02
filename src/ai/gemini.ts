@@ -1,5 +1,27 @@
 import { MlInterviewQaQuestion } from '../types';
 
+export interface DailyPulse {
+  headline: string;
+  briefing: string;
+  topics: string[];
+  date: string;
+  computedAt: string;
+}
+
+export async function fetchTodayPulse(): Promise<DailyPulse | null> {
+  try {
+    const res = await fetch('/api/pulse/today');
+    const data = await res.json();
+    if (data.success && data.pulse) {
+      return data.pulse;
+    }
+    return null;
+  } catch (e) {
+    console.error('Failed to fetch daily pulse:', e);
+    return null;
+  }
+}
+
 export async function checkHasGemini(): Promise<boolean> {
   try {
     const res = await fetch('/api/health');

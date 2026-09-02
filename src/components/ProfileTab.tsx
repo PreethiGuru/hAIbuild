@@ -4,6 +4,8 @@ import { PenguinMascot } from './PenguinMascot/PenguinMascot';
 import { checkHasGemini, fetchAIDailySummary } from '../ai/gemini';
 import { loadLeaderboard } from '../store/firestoreStore';
 import { getOrCreateUid } from '../store/localStore';
+import { SkillTree } from './SkillTree';
+import { BadgesPanel } from './BadgesPanel';
 import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp, Snowflake, Trophy } from 'lucide-react';
 
 interface ProfileTabProps {
@@ -207,6 +209,12 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
           )}
         </div>
       )}
+
+      {/* Skill Tree */}
+      <SkillTree profile={profile} />
+
+      {/* Badges */}
+      <BadgesPanel profile={profile} totalQuestions={totalQuestions} />
 
       {/* Leaderboard */}
       <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-3">

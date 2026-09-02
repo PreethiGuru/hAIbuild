@@ -4,6 +4,7 @@ import { DailyProgress } from '../types';
 import { PenguinMascot } from './PenguinMascot/PenguinMascot';
 import { fetchAIElaboration, fetchAIHint, checkHasGemini } from '../ai/gemini';
 import { Sparkles, CheckCircle2, ChevronDown, ChevronUp, Lightbulb, Bot, AlertCircle, BookOpen, Code2, MessageSquare, Gift } from 'lucide-react';
+import { PulseCard } from './PulseCard';
 
 interface TodayTabProps {
   todayDate: string;
@@ -130,6 +131,9 @@ export const TodayTab: React.FC<TodayTabProps> = ({
           <span>{aiError}</span>
         </div>
       )}
+
+      {/* Pulse: today's trending briefing */}
+      <PulseCard />
 
       {/* 1. DSA Problem Card */}
       <div className="bg-surface border border-border rounded-2xl p-5 shadow-lg space-y-4">
