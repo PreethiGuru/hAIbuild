@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BattleResult, InterviewDifficulty, MlInterviewQaQuestion } from '../types';
-import { getRandomBattleQuestion } from '../data/questions';
+import { getBattleQuestionById, getRandomBattleQuestion } from '../data/questions';
 import { checkHasGemini, generateAIBattleQuestion } from '../ai/gemini';
-import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw } from 'lucide-react';
+import { Swords, Timer, Sparkles, CheckCircle2, XCircle, ArrowRight, Shield, Award, AlertCircle, RefreshCw, Link2, Check } from 'lucide-react';
 
 interface BattleTabProps {
   currentRating: number;
@@ -20,12 +20,36 @@ export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, onRecordRes
   const [hasGemini, setHasGemini] = useState<boolean>(false);
   const [battleResult, setBattleResult] = useState<BattleResult | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState<boolean>(false);
+  const [isChallengeFromFriend, setIsChallengeFromFriend] = useState<boolean>(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     checkHasGemini().then(setHasGemini);
   }, []);
+
+  useEffect(() => {
+    const challengeId = new URLSearchParams(window.location.search).get('challenge');
+    if (!challengeId) return;
+    const challengeQuestion = getBattleQuestionById(challengeId);
+    if (challengeQuestion) {
+      setIsChallengeFromFriend(true);
+      handleStartBattle(challengeQuestion);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleShareChallenge = async () => {
+    const url = `${window.location.origin}${window.location.pathname}?challenge=${currentQuestion.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    } catch (e) {
+      console.error('Failed to copy challenge link:', e);
+    }
+  };
 
   // Timer countdown logic for Phase 2
   useEffect(() => {
@@ -113,6 +137,13 @@ export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, onRecordRes
           </div>
         </div>
       </div>
+
+      {isChallengeFromFriend && phase !== 'result' && (
+        <div className="bg-accent/10 border border-accent/40 rounded-xl p-3 flex items-center gap-2 text-xs text-accent font-semibold">
+          <Link2 className="w-4 h-4 shrink-0" />
+          <span>You're taking on a friend's challenge question!</span>
+        </div>
+      )}
 
       {/* PHASE 1: IDLE */}
       {phase === 'idle' && (
@@ -313,6 +344,24 @@ export const BattleTab: React.FC<BattleTabProps> = ({ currentRating, onRecordRes
               <p className="text-textSecondary leading-relaxed">{currentQuestion.fullExplanation}</p>
             </div>
           </div>
+
+          {/* Challenge a Friend */}
+          <button
+            onClick={handleShareChallenge}
+            className="w-full py-2.5 rounded-xl font-bold text-sm border-2 border-accent2 text-accent2 hover:bg-accent2/10 transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            {linkCopied ? (
+              <>
+                <Check className="w-4 h-4" />
+                <span>Link Copied!</span>
+              </>
+            ) : (
+              <>
+                <Link2 className="w-4 h-4" />
+                <span>Challenge a Friend to This Question</span>
+              </>
+            )}
+          </button>
 
           {/* Next Question Button */}
           <button

@@ -525,3 +525,7 @@ export function getRandomBattleQuestion(): MlInterviewQaQuestion {
   const index = Math.floor(Math.random() * ML_INTERVIEW_QUESTIONS.length);
   return ML_INTERVIEW_QUESTIONS[index];
 }
+
+export function getBattleQuestionById(id: string): MlInterviewQaQuestion | undefined {
+  return ML_INTERVIEW_QUESTIONS.find((q) => q.id === id);
+}
