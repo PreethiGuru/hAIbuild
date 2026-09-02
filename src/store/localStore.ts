@@ -30,6 +30,7 @@ export const DEFAULT_PROFILE: LocalProfile = {
   level: 1,
   freezeAvailable: true,
   nextFreezeAt: null,
+  guildCode: null,
   stats: {
     battlesPlayed: 0,
     battlesWon: 0,

@@ -70,6 +70,7 @@ export interface LocalProfile {
   level: number;
   freezeAvailable: boolean;
   nextFreezeAt: string | null; // "YYYY-MM-DD" -- when a used freeze becomes available again
+  guildCode: string | null;
   stats: {
     battlesPlayed: number;
     battlesWon: number;
@@ -89,6 +90,24 @@ export interface SpeedRoundResult {
   totalAnswered: number;
   xpEarned: number;
   isNewBest: boolean;
+}
+
+export interface GuildMember {
+  uid: string;
+  streakCount: number;
+  rating: number;
+}
+
+export interface GuildData {
+  code: string;
+  name: string;
+  streakGoal: number;
+  members: GuildMember[];
+}
+
+export interface JoinGuildResult {
+  success: boolean;
+  error?: string;
 }
 
 export interface DebugChallengeResult {

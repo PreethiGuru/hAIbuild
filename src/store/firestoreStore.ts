@@ -1,6 +1,6 @@
-import { collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { BattleResult, DailyProgress, DebugChallengeResult, InterviewDifficulty, LeaderboardEntry, LocalProfile, SpeedRoundResult } from '../types';
+import { BattleResult, DailyProgress, DebugChallengeResult, GuildData, InterviewDifficulty, JoinGuildResult, LeaderboardEntry, LocalProfile, SpeedRoundResult } from '../types';
 import {
   DEFAULT_DAILY_PROGRESS,
   DEFAULT_PROFILE,
@@ -263,4 +263,87 @@ export async function recordDebugChallengeResult(correct: boolean): Promise<Debu
 
   await saveProfile(updatedProfile);
   return { correct, xpEarned };
+}
+
+const GUILD_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no O/0/I/1 -- easy to read aloud
+const DEFAULT_GUILD_STREAK_GOAL = 100;
+
+function guildRef(code: string) {
+  return doc(db, 'guilds', code);
+}
+
+function generateGuildCode(): string {
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += GUILD_CODE_CHARS[Math.floor(Math.random() * GUILD_CODE_CHARS.length)];
+  }
+  return code;
+}
+
+export async function createGuild(name: string): Promise<{ code: string }> {
+  const uid = getOrCreateUid();
+  const code = generateGuildCode();
+
+  await setDoc(guildRef(code), {
+    name,
+    streakGoal: DEFAULT_GUILD_STREAK_GOAL,
+    memberUids: [uid],
+    createdAt: new Date().toISOString(),
+  });
+
+  const profile = await loadProfile();
+  await saveProfile({ ...profile, guildCode: code });
+
+  return { code };
+}
+
+export async function joinGuild(code: string): Promise<JoinGuildResult> {
+  const normalizedCode = code.trim().toUpperCase();
+  const snap = await getDoc(guildRef(normalizedCode));
+  if (!snap.exists()) {
+    return { success: false, error: 'No guild found with that code.' };
+  }
+
+  const uid = getOrCreateUid();
+  await updateDoc(guildRef(normalizedCode), { memberUids: arrayUnion(uid) });
+
+  const profile = await loadProfile();
+  await saveProfile({ ...profile, guildCode: normalizedCode });
+
+  return { success: true };
+}
+
+export async function leaveGuild(): Promise<void> {
+  const profile = await loadProfile();
+  if (!profile.guildCode) return;
+
+  const uid = getOrCreateUid();
+  await updateDoc(guildRef(profile.guildCode), { memberUids: arrayRemove(uid) });
+  await saveProfile({ ...profile, guildCode: null });
+}
+
+export async function loadMyGuild(): Promise<GuildData | null> {
+  const profile = await loadProfile();
+  if (!profile.guildCode) return null;
+
+  const snap = await getDoc(guildRef(profile.guildCode));
+  if (!snap.exists()) return null;
+
+  const data = snap.data();
+  const memberUids: string[] = data.memberUids ?? [];
+
+  const memberSnaps = await Promise.all(memberUids.map((uid) => getDoc(profileRef(uid))));
+  const members = memberSnaps
+    .filter((s) => s.exists())
+    .map((s) => {
+      const d = s.data()!;
+      return { uid: s.id, streakCount: d.streakCount ?? 0, rating: d.rating ?? 1200 };
+    });
+
+  return {
+    code: profile.guildCode,
+    name: data.name ?? 'Unnamed Guild',
+    streakGoal: data.streakGoal ?? DEFAULT_GUILD_STREAK_GOAL,
+    members,
+  };
 }

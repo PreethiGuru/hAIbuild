@@ -6,6 +6,7 @@ import { loadLeaderboard } from '../store/firestoreStore';
 import { getOrCreateUid } from '../store/localStore';
 import { SkillTree } from './SkillTree';
 import { BadgesPanel } from './BadgesPanel';
+import { GuildCard } from './GuildCard';
 import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp, Snowflake, Trophy, Bug } from 'lucide-react';
 
 interface ProfileTabProps {
@@ -210,6 +211,9 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
           )}
         </div>
       )}
+
+      {/* Guild */}
+      <GuildCard profile={profile} onProfileChange={onRefresh} />
 
       {/* Skill Tree */}
       <SkillTree profile={profile} />
