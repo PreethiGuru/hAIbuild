@@ -5,6 +5,7 @@ import express from 'express';
 import path from 'path';
 import { GoogleGenAI } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
+import { getTodayPulse } from './agents/dailyPulse';
 
 async function startServer() {
   const app = express();
@@ -32,6 +33,17 @@ async function startServer() {
       status: 'ok',
       hasGemini: Boolean(apiKey),
     });
+  });
+
+  // API Route: Today's Pulse (Trend Agent -> Curriculum Agent, cached in Firestore)
+  app.get('/api/pulse/today', async (req, res) => {
+    try {
+      const pulse = await getTodayPulse();
+      return res.json({ success: true, pulse });
+    } catch (err: any) {
+      console.error('Error computing daily pulse:', err);
+      return res.status(500).json({ success: false, error: err?.message || 'Failed to compute daily pulse.' });
+    }
   });
 
   // API Route: Generate AI Battle Question
