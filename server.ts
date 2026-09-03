@@ -10,7 +10,9 @@ import { getWeeklyCoachReport } from './agents/coachReport';
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  // Cloud Run injects PORT (8080 by default) and requires the container to
+  // listen on it -- a hardcoded port fails to start there.
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json());
 

@@ -6,5 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+# Public Firebase web config only -- needed by Cloud Build at build time.
+# Secrets (GEMINI_API_KEY) stay out of the repo and are set on Cloud Run.
+!.env.production
 service-account-key.json
 *.serviceaccount.json
