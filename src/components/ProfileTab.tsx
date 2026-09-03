@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { LeaderboardEntry, LocalProfile } from '../types';
 import { PenguinMascot, EVOLUTION_TIER_NAMES, getEvolutionTier } from './PenguinMascot/PenguinMascot';
-import { checkHasGemini, fetchAIDailySummary } from '../ai/gemini';
-import { loadLeaderboard } from '../store/firestoreStore';
+import { checkHasGemini } from '../ai/gemini';
+import { loadLeaderboard, WEEKS_FOR_YEAR_ACHIEVEMENT } from '../store/firestoreStore';
 import { getOrCreateUid } from '../store/localStore';
 import { SkillTree } from './SkillTree';
 import { BadgesPanel } from './BadgesPanel';
 import { GuildCard } from './GuildCard';
 import { ShopCard } from './ShopCard';
-import { WEEKS_FOR_YEAR_ACHIEVEMENT } from '../store/firestoreStore';
-import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, Bot, Sparkles, TrendingUp, Snowflake, Trophy, Bug, Grid3x3, Star } from 'lucide-react';
+import { FluencyScoreCard } from './FluencyScoreCard';
+import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, TrendingUp, Snowflake, Trophy, Bug, Grid3x3, Star } from 'lucide-react';
 
 interface ProfileTabProps {
   profile: LocalProfile;
@@ -26,9 +26,6 @@ function daysUntil(dateStr: string | null): number {
 
 export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) => {
   const [hasGemini, setHasGemini] = useState<boolean>(false);
-  const [aiSummary, setAiSummary] = useState<string | null>(null);
-  const [loadingSummary, setLoadingSummary] = useState<boolean>(false);
-  const [showSummaryCard, setShowSummaryCard] = useState<boolean>(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState<boolean>(true);
 
@@ -55,28 +52,6 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
       ? Math.round((profile.stats.battlesWon / profile.stats.battlesPlayed) * 100)
       : 0;
 
-  const handleFetchAiSummary = async () => {
-    if (aiSummary) {
-      setShowSummaryCard(!showSummaryCard);
-      return;
-    }
-
-    setLoadingSummary(true);
-    const summary = await fetchAIDailySummary({
-      rating: profile.rating,
-      streakCount: profile.streakCount,
-      dsaSolvedCount: profile.stats.dsaSolvedCount,
-      mlConceptsViewedCount: profile.stats.mlConceptsViewedCount,
-      battlesPlayed: profile.stats.battlesPlayed,
-      battlesWon: profile.stats.battlesWon,
-    });
-    setLoadingSummary(false);
-
-    if (summary) {
-      setAiSummary(summary);
-      setShowSummaryCard(true);
-    }
-  };
 
   return (
     <div className="space-y-6 pb-24 text-textPrimary">
@@ -185,34 +160,8 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
         </div>
       </div>
 
-      {/* AI Performance Feedback Button */}
-      {hasGemini && (
-        <div className="space-y-3">
-          <button
-            onClick={handleFetchAiSummary}
-            disabled={loadingSummary}
-            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-surface to-surfaceHigh border-2 border-accent text-accent hover:bg-accent/10 transition font-bold text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg"
-          >
-            <Bot className="w-5 h-5" />
-            {loadingSummary ? 'Analyzing Your Performance...' : showSummaryCard ? 'Hide AI Feedback' : 'How am I doing?'}
-          </button>
-
-          {showSummaryCard && aiSummary && (
-            <div className="p-4 bg-surface rounded-2xl border border-accent/50 shadow-xl flex gap-4 items-start animate-fade-in">
-              <div className="shrink-0 pt-1">
-                <PenguinMascot state="walking" size="small" level={profile.level} />
-              </div>
-              <div className="space-y-1 text-xs text-textPrimary">
-                <div className="flex items-center gap-1.5 font-bold text-accent">
-                  <Sparkles className="w-4 h-4" />
-                  <span>Coach Penguin AI Feedback</span>
-                </div>
-                <p className="leading-relaxed text-textSecondary">{aiSummary}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Weekly Coach report + shareable fluency score */}
+      {hasGemini && <FluencyScoreCard profile={profile} />}
 
       {/* Shop */}
       <ShopCard profile={profile} onProfileChange={onRefresh} />

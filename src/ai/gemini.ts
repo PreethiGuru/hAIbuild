@@ -8,6 +8,47 @@ export interface DailyPulse {
   computedAt: string;
 }
 
+export interface FluencyBreakdown {
+  consistency: number;
+  breadth: number;
+  depth: number;
+  competitive: number;
+  accuracy: number;
+}
+
+export interface CoachReport {
+  assessment: string;
+  focusAreas: Array<{ title: string; why: string }>;
+  fluency: {
+    score: number;
+    tier: string;
+    breakdown: FluencyBreakdown;
+  };
+  weekIndex: number;
+  computedAt: string;
+}
+
+export async function fetchCoachReport(
+  uid: string,
+  stats: Record<string, number>
+): Promise<CoachReport | null> {
+  try {
+    const res = await fetch('/api/coach/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid, stats }),
+    });
+    const data = await res.json();
+    if (data.success && data.report) {
+      return data.report;
+    }
+    return null;
+  } catch (e) {
+    console.error('Failed to fetch coach report:', e);
+    return null;
+  }
+}
+
 export async function fetchTodayPulse(): Promise<DailyPulse | null> {
   try {
     const res = await fetch('/api/pulse/today');

@@ -6,6 +6,7 @@ import path from 'path';
 import { GoogleGenAI } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
 import { getTodayPulse } from './agents/dailyPulse';
+import { getWeeklyCoachReport } from './agents/coachReport';
 
 async function startServer() {
   const app = express();
@@ -43,6 +44,21 @@ async function startServer() {
     } catch (err: any) {
       console.error('Error computing daily pulse:', err);
       return res.status(500).json({ success: false, error: err?.message || 'Failed to compute daily pulse.' });
+    }
+  });
+
+  // API Route: Weekly Coach report (Coach Agent, cached per user per week)
+  app.post('/api/coach/report', async (req, res) => {
+    const { uid, stats } = req.body ?? {};
+    if (!uid || !stats) {
+      return res.status(400).json({ success: false, error: 'Missing uid or stats.' });
+    }
+    try {
+      const report = await getWeeklyCoachReport(uid, stats);
+      return res.json({ success: true, report });
+    } catch (err: any) {
+      console.error('Error generating coach report:', err);
+      return res.status(500).json({ success: false, error: err?.message || 'Failed to generate coach report.' });
     }
   });
 
