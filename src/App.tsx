@@ -40,6 +40,16 @@ export default function App() {
         {/* Sticky Header */}
         <Header streakCount={profile.streakCount} />
 
+        {/* What this app is, stated on arrival. Someone opening the link cold
+            -- a judge, a first-time visitor -- should not have to infer the
+            premise from the tabs. Deliberately not sticky: it has done its job
+            once you start scrolling, and pinning it would cost screen height
+            on every tab thereafter. */}
+        <p className="px-4 py-2 text-[11px] leading-snug text-textSecondary bg-accent/5 border-b border-borderFaint">
+          A gamified daily habit that keeps you fluent in AI/ML &mdash; built on real industry
+          trend data, so you can skip the doomscrolling.
+        </p>
+
         {/* Tab Content Viewport */}
         <main className="flex-1 px-4 pt-4 pb-20">
           {activeTab === 'today' && (
