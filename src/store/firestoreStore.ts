@@ -1,6 +1,7 @@
-import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { BattleResult, ClaimBadgeResult, DailyProgress, DebugChallengeResult, DuelData, GuildData, InterviewDifficulty, JoinGuildResult, LeaderboardEntry, LocalProfile, MatrixRoundResult, MAX_ITEM_STACK, ShopPurchaseResult, SpeedRoundResult, WeeklyReconcileResult } from '../types';
+import { compareForRanking, getLeagueWeekIndex } from '../constants/leagues';
+import { BattleResult, ClaimBadgeResult, DailyProgress, DebugChallengeResult, DuelData, GuildData, InterviewDifficulty, JoinGuildResult, LeaderboardEntry, LeagueStanding, LocalProfile, MatrixRoundResult, MAX_ITEM_STACK, ShopPurchaseResult, SpeedRoundResult, WeeklyReconcileResult } from '../types';
 import {
   DEFAULT_DAILY_PROGRESS,
   DEFAULT_PROFILE,
@@ -72,20 +73,44 @@ function advanceStreak(
 
 /**
  * Applies XP, consuming one XP-booster charge (if held) to double this
- * specific gain. Centralized so every reward path applies boosters the same
- * way instead of five separate ad-hoc implementations.
+ * specific gain, and credits the same amount to the current league week.
+ * Centralized so every reward path applies boosters and feeds the ladder the
+ * same way, instead of five separate ad-hoc implementations -- any future
+ * activity that awards XP is ranked automatically by routing through here.
  */
 function applyXp(
   profile: LocalProfile,
   baseAmount: number
-): { xp: number; level: number; xpBoosterCount: number; effectiveAmount: number } {
+): {
+  xp: number;
+  level: number;
+  xpBoosterCount: number;
+  weeklyXp: number;
+  weeklyXpWeekIndex: number;
+  effectiveAmount: number;
+} {
   const boosted = baseAmount > 0 && profile.xpBoosterCount > 0;
   const effectiveAmount = boosted ? baseAmount * 2 : baseAmount;
   const xp = profile.xp + effectiveAmount;
+
+  // The weekly processor is the normal resetter of weeklyXp, so the client
+  // deliberately does NOT clear a one-week-stale total: between Sunday 00:00
+  // IST and the scheduled run minutes later, that total is still the score
+  // about to be ranked, and zeroing it here would erase the user's week. A
+  // gap of two or more weeks means the run never happened and never will, so
+  // the total is stale rather than pending and is safe to drop -- which also
+  // stops it compounding indefinitely if the scheduler is ever down.
+  const currentWeek = getLeagueWeekIndex();
+  const lastWeek = profile.weeklyXpWeekIndex;
+  const isAbandoned = lastWeek !== null && currentWeek - lastWeek >= 2;
+  const carried = lastWeek === null || isAbandoned ? 0 : profile.weeklyXp;
+
   return {
     xp,
     level: Math.floor(xp / 100) + 1,
     xpBoosterCount: boosted ? profile.xpBoosterCount - 1 : profile.xpBoosterCount,
+    weeklyXp: carried + effectiveAmount,
+    weeklyXpWeekIndex: currentWeek,
     effectiveAmount,
   };
 }
@@ -157,6 +182,8 @@ export async function markContentAsViewed(
     xp: xpGain.xp,
     level: xpGain.level,
     xpBoosterCount: xpGain.xpBoosterCount,
+    weeklyXp: xpGain.weeklyXp,
+    weeklyXpWeekIndex: xpGain.weeklyXpWeekIndex,
     stats: newStats,
   };
 
@@ -199,6 +226,8 @@ export async function recordBattleResult(
     xp: xpGain.xp,
     level: xpGain.level,
     xpBoosterCount: xpGain.xpBoosterCount,
+    weeklyXp: xpGain.weeklyXp,
+    weeklyXpWeekIndex: xpGain.weeklyXpWeekIndex,
     stats: {
       ...profile.stats,
       battlesPlayed: profile.stats.battlesPlayed + 1,
@@ -226,6 +255,51 @@ export async function loadLeaderboard(limitCount: number = 10): Promise<Leaderbo
   });
 }
 
+/** How many players of a division to pull for the standings board. */
+const LEAGUE_STANDINGS_LIMIT = 50;
+
+/**
+ * Loads everyone in one division, ranked by this week's XP.
+ *
+ * Deliberately a single equality filter with the ordering done in memory:
+ * combining `where(divisionIndex)` with `orderBy(weeklyXp)` in the query
+ * would require a composite index to be deployed before the board renders at
+ * all, whereas a lone equality filter is served by Firestore's automatic
+ * single-field index. At a division's capped size, sorting client-side costs
+ * nothing and removes a deployment step that could silently break the page.
+ */
+export async function loadLeagueStandings(divisionIndex: number): Promise<LeagueStanding[]> {
+  const q = query(
+    collection(db, 'users'),
+    where('divisionIndex', '==', divisionIndex),
+    limit(LEAGUE_STANDINGS_LIMIT)
+  );
+  const snap = await getDocs(q);
+
+  return snap.docs
+    .map((d) => {
+      const data = d.data();
+      return {
+        uid: d.id,
+        weeklyXp: data.weeklyXp ?? 0,
+        xp: data.xp ?? 0,
+        streakCount: data.streakCount ?? 0,
+        level: data.level ?? 1,
+      };
+    })
+    // Shared with the weekly processor: early in a week most of a division
+    // sits on zero, and ordering those ties differently here would show a
+    // player a rank the settlement is not going to give them.
+    .sort(compareForRanking);
+}
+
+/** Clears the promotion/demotion banner once the user has seen it. */
+export async function acknowledgeLeagueResult(): Promise<void> {
+  const profile = await loadProfile();
+  if (!profile.lastLeagueResult) return;
+  await saveProfile({ ...profile, lastLeagueResult: null });
+}
+
 const SPEED_ROUND_XP_PER_CORRECT = 2;
 
 export async function recordSpeedRoundResult(
@@ -248,6 +322,8 @@ export async function recordSpeedRoundResult(
     xp: xpGain.xp,
     level: xpGain.level,
     xpBoosterCount: xpGain.xpBoosterCount,
+    weeklyXp: xpGain.weeklyXp,
+    weeklyXpWeekIndex: xpGain.weeklyXpWeekIndex,
     stats: {
       ...profile.stats,
       speedRoundsPlayed: profile.stats.speedRoundsPlayed + 1,
@@ -277,6 +353,8 @@ export async function recordDebugChallengeResult(correct: boolean): Promise<Debu
     xp: xpGain.xp,
     level: xpGain.level,
     xpBoosterCount: xpGain.xpBoosterCount,
+    weeklyXp: xpGain.weeklyXp,
+    weeklyXpWeekIndex: xpGain.weeklyXpWeekIndex,
     stats: {
       ...profile.stats,
       debugChallengesAttempted: profile.stats.debugChallengesAttempted + 1,
@@ -391,6 +469,8 @@ export async function recordMatrixRoundResult(
     xp: xpGain.xp,
     level: xpGain.level,
     xpBoosterCount: xpGain.xpBoosterCount,
+    weeklyXp: xpGain.weeklyXp,
+    weeklyXpWeekIndex: xpGain.weeklyXpWeekIndex,
     stats: {
       ...profile.stats,
       matrixRoundsCompleted: profile.stats.matrixRoundsCompleted + 1,

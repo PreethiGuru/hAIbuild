@@ -79,6 +79,11 @@ export interface LocalProfile {
   lastReconciledWeekIndex: number | null;
   yearAchievementCount: number; // times the 52-week achievement has been earned
   guildCode: string | null;
+  divisionIndex: number | null; // index into DIVISIONS; null = Unranked
+  lastRankedDivision: number; // division to re-enter at after an inactivity unrank
+  weeklyXp: number; // XP earned this league week -- the sole ranking signal
+  weeklyXpWeekIndex: number | null; // league week weeklyXp belongs to
+  lastLeagueResult: LeagueResult | null;
   stats: {
     battlesPlayed: number;
     battlesWon: number;
@@ -93,6 +98,27 @@ export interface LocalProfile {
     matrixRoundsCompleted: number;
     matrixBestTimeMs: number;
   };
+}
+
+export type LeagueMovement = 'promoted' | 'demoted' | 'held';
+
+/** The outcome of the most recent weekly processing, for the results banner. */
+export interface LeagueResult {
+  weekIndex: number;
+  rank: number;
+  divisionSize: number;
+  fromDivision: number;
+  toDivision: number;
+  movement: LeagueMovement;
+  snowflakesEarned: number;
+}
+
+export interface LeagueStanding {
+  uid: string;
+  weeklyXp: number;
+  xp: number; // lifetime XP -- the tiebreak, so the board matches settlement
+  streakCount: number;
+  level: number;
 }
 
 export interface ShopPurchaseResult {

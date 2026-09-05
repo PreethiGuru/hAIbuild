@@ -7,6 +7,8 @@ import { GoogleGenAI } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
 import { getTodayPulse } from './agents/dailyPulse';
 import { getWeeklyCoachReport } from './agents/coachReport';
+import { processLeagueWeek } from './agents/leagueProcessor';
+import { refreshTrends } from './agents/trendRefresh';
 
 async function startServer() {
   const app = express();
@@ -61,6 +63,51 @@ async function startServer() {
     } catch (err: any) {
       console.error('Error generating coach report:', err);
       return res.status(500).json({ success: false, error: err?.message || 'Failed to generate coach report.' });
+    }
+  });
+
+  // --- Scheduled jobs (Cloud Scheduler) ---------------------------------
+  //
+  // These mutate shared state for every user, so they are gated on a shared
+  // secret sent by the scheduler rather than left open on a public URL. The
+  // comparison is length-safe: a missing or wrong-length header fails before
+  // any work is done. If SCHEDULER_SECRET is unset the routes refuse outright
+  // instead of defaulting to open.
+  const schedulerSecret = process.env.SCHEDULER_SECRET;
+
+  function isAuthorizedJob(req: express.Request): boolean {
+    if (!schedulerSecret) return false;
+    const provided = req.get('X-Scheduler-Secret');
+    return typeof provided === 'string' && provided === schedulerSecret;
+  }
+
+  // Daily: re-run the BigQuery trend query, then regenerate the Pulse from it.
+  app.post('/api/jobs/refresh-pulse', async (req, res) => {
+    if (!isAuthorizedJob(req)) {
+      return res.status(401).json({ success: false, error: 'Unauthorized.' });
+    }
+    try {
+      const trends = await refreshTrends();
+      const pulse = await getTodayPulse({ force: true });
+      return res.json({ success: true, trends, pulseDate: pulse.date });
+    } catch (err: any) {
+      console.error('Scheduled pulse refresh failed:', err);
+      return res.status(500).json({ success: false, error: err?.message || 'Pulse refresh failed.' });
+    }
+  });
+
+  // Weekly, Sunday 00:00 IST: settle the league -- rank each division by the
+  // week's XP, promote/demote, pay out Snowflakes, reset weekly totals.
+  app.post('/api/jobs/process-league', async (req, res) => {
+    if (!isAuthorizedJob(req)) {
+      return res.status(401).json({ success: false, error: 'Unauthorized.' });
+    }
+    try {
+      const summary = await processLeagueWeek({ force: Boolean(req.body?.force) });
+      return res.json({ success: true, summary });
+    } catch (err: any) {
+      console.error('Scheduled league processing failed:', err);
+      return res.status(500).json({ success: false, error: err?.message || 'League processing failed.' });
     }
   });
 

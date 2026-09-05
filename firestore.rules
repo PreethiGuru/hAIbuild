@@ -24,6 +24,13 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // Weekly league settlement summaries, written only by the scheduled job
+    // (Firebase Admin SDK, which bypasses these rules). Clients never write.
+    match /leagueRuns/{weekIndex} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /duels/{duelId} {
       allow read, write: if true;
     }

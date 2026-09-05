@@ -1,3 +1,4 @@
+import { STARTING_DIVISION } from '../constants/leagues';
 import { BattleResult, DailyProgress, InterviewDifficulty, LocalProfile } from '../types';
 
 const UID_KEY = '@aidh/uid';
@@ -67,6 +68,13 @@ export const DEFAULT_PROFILE: LocalProfile = {
   lastReconciledWeekIndex: null,
   yearAchievementCount: 0,
   guildCode: null,
+  // New learners drop straight into Iron 1 rather than sitting Unranked --
+  // there is nothing to climb from Unranked, and the ladder is the hook.
+  divisionIndex: STARTING_DIVISION,
+  lastRankedDivision: STARTING_DIVISION,
+  weeklyXp: 0,
+  weeklyXpWeekIndex: null,
+  lastLeagueResult: null,
   stats: {
     battlesPlayed: 0,
     battlesWon: 0,

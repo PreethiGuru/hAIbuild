@@ -9,6 +9,7 @@ import { BadgesPanel } from './BadgesPanel';
 import { GuildCard } from './GuildCard';
 import { ShopCard } from './ShopCard';
 import { FluencyScoreCard } from './FluencyScoreCard';
+import { LeagueCard } from './LeagueCard';
 import { Flame, Shield, Award, Zap, Code2, BookOpen, MessageSquare, Swords, TrendingUp, Snowflake, Trophy, Bug, Grid3x3, Star } from 'lucide-react';
 
 interface ProfileTabProps {
@@ -159,6 +160,9 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
           <div className="text-[10px] text-textMuted">{profile.xp} Total XP</div>
         </div>
       </div>
+
+      {/* Weekly league ladder */}
+      <LeagueCard profile={profile} onProfileChange={onRefresh} />
 
       {/* Weekly Coach report + shareable fluency score */}
       {hasGemini && <FluencyScoreCard profile={profile} />}

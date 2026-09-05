@@ -15,14 +15,21 @@ export interface DailyPulse extends PulseContent {
   computedAt: string;
 }
 
-export async function getTodayPulse(): Promise<DailyPulse> {
+/**
+ * `force` skips the per-day cache. Used by the scheduled refresh, which runs
+ * right after new BigQuery trends land and must not hand back a briefing
+ * written from yesterday's signal just because someone opened the app first.
+ */
+export async function getTodayPulse(options: { force?: boolean } = {}): Promise<DailyPulse> {
   const db = getDb();
   const today = getTodayDateString();
   const cacheRef = db.collection('pulse').doc(today);
-  const cached = await cacheRef.get();
 
-  if (cached.exists) {
-    return cached.data() as DailyPulse;
+  if (!options.force) {
+    const cached = await cacheRef.get();
+    if (cached.exists) {
+      return cached.data() as DailyPulse;
+    }
   }
 
   const [pulseSnap, foundationalSnap] = await Promise.all([
