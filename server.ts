@@ -32,6 +32,12 @@ async function startServer() {
     });
   }
 
+  // The client renders these answers as light Markdown (bold, code, lists).
+  // LaTeX is the one thing it cannot typeset, and the model reaches for it
+  // unprompted whenever complexity comes up -- "$O(1)$" instead of "O(1)".
+  const PROSE_STYLE_RULE =
+    'Write plain prose. Do not use LaTeX or dollar-sign math notation: write complexities as plain text such as O(1) or O(n log n). Bold and inline code are fine.';
+
   // API Route: Health check & AI status
   app.get('/api/health', (req, res) => {
     res.json({
@@ -167,7 +173,9 @@ Return JSON only, no markdown formatting, no codeblocks, in this exact shape:
 
     try {
       const prompt = `Give a short (2-3 sentence) hint for solving this DSA problem without revealing the direct solution code.
-Problem: ${problemStatement}`;
+Problem: ${problemStatement}
+
+${PROSE_STYLE_RULE}`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.6-flash',
@@ -195,7 +203,9 @@ Problem: ${problemStatement}`;
     try {
       const prompt = `Explain this ML concept in simpler terms with a concrete real-world example a junior engineer would understand.
 Concept/Question: ${question}
-Answer: ${shortAnswer}`;
+Answer: ${shortAnswer}
+
+${PROSE_STYLE_RULE}`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.6-flash',

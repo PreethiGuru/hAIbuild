@@ -4,6 +4,7 @@ import { DailyProgress } from '../types';
 import { PenguinMascot } from './PenguinMascot/PenguinMascot';
 import { fetchAIElaboration, fetchAIHint, checkHasGemini } from '../ai/gemini';
 import { Sparkles, CheckCircle2, ChevronDown, ChevronUp, Lightbulb, Bot, AlertCircle, BookOpen, Code2, MessageSquare, Gift } from 'lucide-react';
+import { FormattedText } from './FormattedText';
 import { PulseCard } from './PulseCard';
 
 interface TodayTabProps {
@@ -266,7 +267,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
                   <Lightbulb className="w-4 h-4" />
                   <span>AI Hint</span>
                 </div>
-                <p className="leading-relaxed text-textSecondary">{hintText}</p>
+                <FormattedText className="leading-relaxed text-textSecondary">{hintText}</FormattedText>
               </div>
             )}
           </div>
@@ -432,7 +433,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
                   <Sparkles className="w-4 h-4 text-accent" />
                   <span>AI Simplified Elaboration</span>
                 </div>
-                <p className="leading-relaxed text-textSecondary">{elaborationText}</p>
+                <FormattedText className="leading-relaxed text-textSecondary">{elaborationText}</FormattedText>
               </div>
             )}
           </div>

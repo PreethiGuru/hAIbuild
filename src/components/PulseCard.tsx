@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DailyPulse, fetchTodayPulse } from '../ai/gemini';
 import { Activity } from 'lucide-react';
+import { FormattedText } from './FormattedText';
 
 export const PulseCard: React.FC = () => {
   const [pulse, setPulse] = useState<DailyPulse | null>(null);
@@ -28,7 +29,9 @@ export const PulseCard: React.FC = () => {
       ) : pulse ? (
         <>
           <h2 className="text-lg font-bold text-textPrimary">{pulse.headline}</h2>
-          <p className="text-sm text-textSecondary leading-relaxed">{pulse.briefing}</p>
+          <FormattedText className="text-sm text-textSecondary leading-relaxed">
+            {pulse.briefing}
+          </FormattedText>
           {pulse.topics.length > 0 && (
             <div className="flex flex-wrap gap-1.5 pt-1">
               {pulse.topics.map((t) => (

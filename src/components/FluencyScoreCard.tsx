@@ -3,6 +3,7 @@ import { LocalProfile } from '../types';
 import { CoachReport, fetchCoachReport } from '../ai/gemini';
 import { getOrCreateUid } from '../store/localStore';
 import { Bot, Share2, Check, Sparkles, Target } from 'lucide-react';
+import { FormattedText } from './FormattedText';
 
 interface FluencyScoreCardProps {
   profile: LocalProfile;
@@ -128,7 +129,9 @@ export const FluencyScoreCard: React.FC<FluencyScoreCardProps> = ({ profile }) =
             })}
           </div>
 
-          <p className="text-xs text-textSecondary leading-relaxed">{report.assessment}</p>
+          <FormattedText className="text-xs text-textSecondary leading-relaxed">
+            {report.assessment}
+          </FormattedText>
 
           {report.focusAreas.length > 0 && (
             <div className="space-y-2">
@@ -139,7 +142,7 @@ export const FluencyScoreCard: React.FC<FluencyScoreCardProps> = ({ profile }) =
               {report.focusAreas.map((area) => (
                 <div key={area.title} className="p-2.5 rounded-xl bg-surfaceHigh border border-border">
                   <div className="text-xs font-bold text-textPrimary">{area.title}</div>
-                  <div className="text-[11px] text-textMuted leading-relaxed">{area.why}</div>
+                  <FormattedText className="text-[11px] text-textMuted leading-relaxed">{area.why}</FormattedText>
                 </div>
               ))}
             </div>
