@@ -256,9 +256,39 @@ Give me 2-3 sentences of honest, encouraging feedback and one specific target to
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+
+    app.use(
+      express.static(distPath, {
+        setHeaders: (res, filePath) => {
+          // Bundle filenames carry a content hash, so a given name's contents
+          // never change and it can be cached indefinitely.
+          if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          } else if (filePath.endsWith('index.html')) {
+            // Set here as well as on the fallback route below: this middleware
+            // answers "/" itself and never reaches that handler.
+            res.setHeader('Cache-Control', 'no-cache');
+          }
+        },
+      })
+    );
+
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      // Only extensionless paths are client-side routes. Without this check a
+      // request for a bundle that no longer exists -- exactly what a browser
+      // holding an index.html from a previous deploy asks for -- falls through
+      // to the SPA shell and is answered with HTML under a 200. The browser
+      // then parses that HTML as JavaScript, throws, and renders a blank page
+      // instead of recovering. A real 404 lets it fail honestly.
+      if (path.extname(req.path)) {
+        return res.status(404).send('Not found');
+      }
+
+      // The shell names the hashed bundles, so a stale copy points at files
+      // that are gone. Always revalidate it, even though the assets it
+      // references are cached hard.
+      res.setHeader('Cache-Control', 'no-cache');
+      return res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
