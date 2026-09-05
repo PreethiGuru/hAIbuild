@@ -19,10 +19,33 @@ async function startServer() {
 
   app.use(express.json());
 
-  // Initialize Gemini API if API key exists
+  // Two ways to reach Gemini, chosen by env var so the backend can be swapped
+  // without a rebuild:
+  //
+  //  - Vertex AI (GOOGLE_GENAI_USE_VERTEXAI=true) authenticates as the runtime
+  //    service account and bills the Google Cloud project, which is where the
+  //    trial credits actually live.
+  //  - An AI Studio API key bills that key's own project, whose prepay balance
+  //    is a separate wallet the Cloud credits never reach. On an unbilled
+  //    project that means the free tier: 20 requests per day, total.
+  //
+  // The key path stays as the fallback, so reverting is one env var and no
+  // code change.
+  // ADK now prefers GOOGLE_GENAI_USE_ENTERPRISE and warns on the older name;
+  // accept either so the agents and this client always agree on the backend.
+  const useVertex =
+    process.env.GOOGLE_GENAI_USE_ENTERPRISE === 'true' ||
+    process.env.GOOGLE_GENAI_USE_VERTEXAI === 'true';
   const apiKey = process.env.GEMINI_API_KEY || process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+
   let ai: GoogleGenAI | null = null;
-  if (apiKey) {
+  if (useVertex) {
+    ai = new GoogleGenAI({
+      vertexai: true,
+      project: process.env.GOOGLE_CLOUD_PROJECT || process.env.VITE_FIREBASE_PROJECT_ID,
+      location: process.env.GOOGLE_CLOUD_LOCATION || 'global',
+    });
+  } else if (apiKey) {
     ai = new GoogleGenAI({
       apiKey: apiKey,
       httpOptions: {
@@ -32,6 +55,7 @@ async function startServer() {
       },
     });
   }
+  console.log(`Gemini backend: ${useVertex ? 'Vertex AI' : apiKey ? 'AI Studio API key' : 'NONE'}`);
 
   const GEMINI_MODEL = 'gemini-3.6-flash';
 
@@ -66,7 +90,8 @@ async function startServer() {
   app.get('/api/health', (req, res) => {
     res.json({
       status: 'ok',
-      hasGemini: Boolean(apiKey),
+      hasGemini: Boolean(ai),
+      geminiBackend: useVertex ? 'vertex' : apiKey ? 'apikey' : 'none',
     });
   });
 
