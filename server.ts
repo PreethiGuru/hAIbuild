@@ -9,6 +9,7 @@ import { getTodayPulse } from './agents/dailyPulse';
 import { getWeeklyCoachReport } from './agents/coachReport';
 import { processLeagueWeek } from './agents/leagueProcessor';
 import { refreshTrends } from './agents/trendRefresh';
+import { getOrGenerate } from './agents/aiCache';
 
 async function startServer() {
   const app = express();
@@ -30,6 +31,29 @@ async function startServer() {
         },
       },
     });
+  }
+
+  const GEMINI_MODEL = 'gemini-3.6-flash';
+
+  /**
+   * The free tier allows 20 generate_content calls per day for the whole
+   * project, so exhaustion is a routine state, not an exception. Reporting it
+   * as a generic failure sent users to "try again later" when the honest
+   * answer is that the daily allowance is gone until tomorrow.
+   */
+  function isQuotaError(err: any): boolean {
+    const status = err?.status ?? err?.code;
+    return status === 429 || /RESOURCE_EXHAUSTED|quota/i.test(String(err?.message ?? ''));
+  }
+
+  function quotaAwareStatus(err: any): number {
+    return isQuotaError(err) ? 429 : 500;
+  }
+
+  function describeAiError(err: any): string {
+    return isQuotaError(err)
+      ? "Today's AI request limit for this project has been reached. The written explanation below is always available, and AI hints return tomorrow."
+      : 'Could not reach the AI service just now. Please try again in a moment.';
   }
 
   // The client renders these answers as light Markdown (bold, code, lists).
@@ -177,15 +201,20 @@ Problem: ${problemStatement}
 
 ${PROSE_STYLE_RULE}`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
-        contents: prompt,
+      // Cached on the problem text: every user sees the same daily problem, so
+      // this is one generation shared by everyone rather than one per view.
+      const { text } = await getOrGenerate('hint', problemStatement, async () => {
+        const response = await ai!.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: prompt,
+        });
+        return response.text || '';
       });
 
-      return res.json({ success: true, hint: response.text });
+      return res.json({ success: true, hint: text });
     } catch (err: any) {
       console.error('Error generating AI hint:', err);
-      return res.status(500).json({ success: false, error: 'Failed to generate AI hint.' });
+      return res.status(quotaAwareStatus(err)).json({ success: false, error: describeAiError(err) });
     }
   });
 
@@ -207,15 +236,19 @@ Answer: ${shortAnswer}
 
 ${PROSE_STYLE_RULE}`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
-        contents: prompt,
+      const { text } = await getOrGenerate('elaborate', `${question}
+${shortAnswer}`, async () => {
+        const response = await ai!.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: prompt,
+        });
+        return response.text || '';
       });
 
-      return res.json({ success: true, elaboration: response.text });
+      return res.json({ success: true, elaboration: text });
     } catch (err: any) {
       console.error('Error generating AI elaboration:', err);
-      return res.status(500).json({ success: false, error: 'Failed to generate AI elaboration.' });
+      return res.status(quotaAwareStatus(err)).json({ success: false, error: describeAiError(err) });
     }
   });
 

@@ -106,7 +106,7 @@ export const GuildCard: React.FC<GuildCardProps> = ({ profile, onProfileChange }
       <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-4">
         <div className="flex items-center gap-2 text-accent2">
           <Users className="w-4 h-4" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-textMuted">Guild</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-textSecondary">Guild</h3>
         </div>
 
         {error && <p className="text-xs text-danger">{error}</p>}

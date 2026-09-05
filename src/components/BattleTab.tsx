@@ -453,7 +453,7 @@ export const BattleTab: React.FC<BattleTabProps> = ({
                     : 'bg-surfaceHigh border-border'
                 }`}
               >
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-textMuted">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-textSecondary">
                   <Swords className="w-3.5 h-3.5" />
                   <span>1v1 Duel Result</span>
                 </div>
@@ -496,7 +496,7 @@ export const BattleTab: React.FC<BattleTabProps> = ({
 
           {/* Options Recap */}
           <div className="space-y-2.5">
-            <h4 className="text-xs font-bold uppercase text-textMuted tracking-wider">
+            <h4 className="text-xs font-bold uppercase text-textSecondary tracking-wider">
               ANSWER RECAP
             </h4>
 

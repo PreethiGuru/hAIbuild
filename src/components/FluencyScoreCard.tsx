@@ -77,7 +77,7 @@ export const FluencyScoreCard: React.FC<FluencyScoreCardProps> = ({ profile }) =
     <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-4">
       <div className="flex items-center gap-2 text-accent">
         <Bot className="w-4 h-4" />
-        <h3 className="text-xs font-bold uppercase tracking-wider text-textMuted">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-textSecondary">
           Weekly Fluency Report
         </h3>
       </div>
@@ -135,7 +135,7 @@ export const FluencyScoreCard: React.FC<FluencyScoreCardProps> = ({ profile }) =
 
           {report.focusAreas.length > 0 && (
             <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-textMuted">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-textSecondary">
                 <Target className="w-3 h-3" />
                 <span>Focus this week</span>
               </div>

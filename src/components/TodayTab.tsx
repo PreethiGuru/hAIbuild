@@ -62,13 +62,13 @@ export const TodayTab: React.FC<TodayTabProps> = ({
     }
     setLoadingHint(true);
     setAiError(null);
-    const hint = await fetchAIHint(dailySet.dsa.problemStatement);
+    const { text, error } = await fetchAIHint(dailySet.dsa.problemStatement);
     setLoadingHint(false);
-    if (hint) {
-      setHintText(hint);
+    if (text) {
+      setHintText(text);
       setShowHintCard(true);
     } else {
-      setAiError('AI hint unavailable right now. Try again later!');
+      setAiError(error);
     }
   };
 
@@ -79,13 +79,16 @@ export const TodayTab: React.FC<TodayTabProps> = ({
     }
     setLoadingElaborate(true);
     setAiError(null);
-    const elab = await fetchAIElaboration(dailySet.mlQa.question, dailySet.mlQa.shortAnswer);
+    const { text, error } = await fetchAIElaboration(
+      dailySet.mlQa.question,
+      dailySet.mlQa.shortAnswer
+    );
     setLoadingElaborate(false);
-    if (elab) {
-      setElaborationText(elab);
+    if (text) {
+      setElaborationText(text);
       setShowElaborateCard(true);
     } else {
-      setAiError('AI elaboration unavailable right now.');
+      setAiError(error);
     }
   };
 
@@ -185,7 +188,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 
         {/* Problem Statement */}
         <div>
-          <h4 className="text-xs font-bold uppercase text-textMuted tracking-wider mb-1">
+          <h4 className="text-xs font-bold uppercase text-textSecondary tracking-wider mb-1">
             PROBLEM
           </h4>
           <p className="text-sm text-textPrimary leading-relaxed">
@@ -195,7 +198,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 
         {/* Constraints */}
         <div>
-          <h4 className="text-xs font-bold uppercase text-textMuted tracking-wider mb-1">
+          <h4 className="text-xs font-bold uppercase text-textSecondary tracking-wider mb-1">
             CONSTRAINTS
           </h4>
           <ul className="list-disc list-inside text-xs text-textSecondary space-y-1 pl-1">
@@ -228,7 +231,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
               {/* Diagram Spec Box */}
               {app.diagramSpec && (
                 <div className="bg-background p-3 rounded-lg border border-borderFaint text-xs">
-                  <div className="text-[10px] font-semibold text-textMuted uppercase mb-2">
+                  <div className="text-[10px] font-semibold text-textSecondary uppercase mb-2">
                     Execution Graph
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -315,7 +318,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 
         {/* Analogy */}
         <div>
-          <h4 className="text-xs font-bold uppercase text-textMuted tracking-wider mb-1">
+          <h4 className="text-xs font-bold uppercase text-textSecondary tracking-wider mb-1">
             ANALOGY
           </h4>
           <p className="text-xs text-textPrimary leading-relaxed bg-surfaceHigh p-3 rounded-xl border border-border">
@@ -325,7 +328,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 
         {/* Deep Dive */}
         <div>
-          <h4 className="text-xs font-bold uppercase text-textMuted tracking-wider mb-1">
+          <h4 className="text-xs font-bold uppercase text-textSecondary tracking-wider mb-1">
             DEEP DIVE
           </h4>
           <p className="text-xs text-textSecondary leading-relaxed">
@@ -387,7 +390,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 
         {/* Short Answer */}
         <div>
-          <h4 className="text-xs font-bold uppercase text-textMuted tracking-wider mb-1">
+          <h4 className="text-xs font-bold uppercase text-textSecondary tracking-wider mb-1">
             SHORT ANSWER
           </h4>
           <p className="text-xs text-textPrimary leading-relaxed bg-surfaceHigh p-3 rounded-xl border border-border font-medium">
@@ -397,7 +400,7 @@ export const TodayTab: React.FC<TodayTabProps> = ({
 
         {/* Full Explanation */}
         <div>
-          <h4 className="text-xs font-bold uppercase text-textMuted tracking-wider mb-1">
+          <h4 className="text-xs font-bold uppercase text-textSecondary tracking-wider mb-1">
             FULL EXPLANATION
           </h4>
           <p className="text-xs text-textSecondary leading-relaxed">

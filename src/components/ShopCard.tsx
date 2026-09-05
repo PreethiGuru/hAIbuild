@@ -41,7 +41,7 @@ export const ShopCard: React.FC<ShopCardProps> = ({ profile, onProfileChange }) 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-accent2">
           <ShoppingBag className="w-4 h-4" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-textMuted">Shop</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-textSecondary">Shop</h3>
         </div>
         <div className="flex items-center gap-1 text-sm font-bold text-accent2">
           <Snowflake className="w-4 h-4" />

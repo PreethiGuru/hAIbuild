@@ -175,7 +175,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-warning">
             <Star className="w-4 h-4" />
-            <span className="text-xs font-bold uppercase tracking-wider text-textMuted">
+            <span className="text-xs font-bold uppercase tracking-wider text-textSecondary">
               Year Achievement
             </span>
           </div>
@@ -208,7 +208,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
       <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-3">
         <div className="flex items-center gap-2 text-warning">
           <Trophy className="w-4 h-4" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-textMuted">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-textSecondary">
             Leaderboard
           </h3>
         </div>
@@ -251,7 +251,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onRefresh }) =>
 
       {/* Detailed Learning Stats */}
       <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-3">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-textMuted mb-2">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-textSecondary mb-2">
           LEARNING BREAKDOWN
         </h3>
 

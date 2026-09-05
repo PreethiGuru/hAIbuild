@@ -138,7 +138,7 @@ export const PitchTab: React.FC<PitchTabProps> = ({ onNavigateToTab }) => {
 
       {/* Tech Stack & Architecture */}
       <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-3">
-        <h2 className="text-xs font-bold uppercase text-textMuted tracking-wider flex items-center gap-2">
+        <h2 className="text-xs font-bold uppercase text-textSecondary tracking-wider flex items-center gap-2">
           <Cpu className="w-4 h-4 text-accent" />
           <span>Technology & Architecture</span>
         </h2>

@@ -103,7 +103,19 @@ export async function generateAIBattleQuestion(): Promise<MlInterviewQaQuestion 
   }
 }
 
-export async function fetchAIHint(problemStatement: string): Promise<string | null> {
+/**
+ * Result rather than string|null so the caller can show the reason. The server
+ * distinguishes "daily quota is gone" from "something broke", and collapsing
+ * both to null forced the UI into a misleading "try again later".
+ */
+export interface AiTextResult {
+  text: string | null;
+  error: string | null;
+}
+
+const GENERIC_AI_ERROR = 'Could not reach the AI service just now. Please try again in a moment.';
+
+export async function fetchAIHint(problemStatement: string): Promise<AiTextResult> {
   try {
     const res = await fetch('/api/gemini/hint', {
       method: 'POST',
@@ -112,16 +124,19 @@ export async function fetchAIHint(problemStatement: string): Promise<string | nu
     });
     const data = await res.json();
     if (data.success && data.hint) {
-      return data.hint;
+      return { text: data.hint, error: null };
     }
-    return null;
+    return { text: null, error: data.error || GENERIC_AI_ERROR };
   } catch (e) {
     console.error('Failed to fetch AI hint:', e);
-    return null;
+    return { text: null, error: GENERIC_AI_ERROR };
   }
 }
 
-export async function fetchAIElaboration(question: string, shortAnswer: string): Promise<string | null> {
+export async function fetchAIElaboration(
+  question: string,
+  shortAnswer: string
+): Promise<AiTextResult> {
   try {
     const res = await fetch('/api/gemini/elaborate', {
       method: 'POST',
@@ -130,12 +145,12 @@ export async function fetchAIElaboration(question: string, shortAnswer: string):
     });
     const data = await res.json();
     if (data.success && data.elaboration) {
-      return data.elaboration;
+      return { text: data.elaboration, error: null };
     }
-    return null;
+    return { text: null, error: data.error || GENERIC_AI_ERROR };
   } catch (e) {
     console.error('Failed to fetch AI elaboration:', e);
-    return null;
+    return { text: null, error: GENERIC_AI_ERROR };
   }
 }
 

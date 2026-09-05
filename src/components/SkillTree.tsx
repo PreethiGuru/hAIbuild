@@ -34,7 +34,7 @@ export const SkillTree: React.FC<SkillTreeProps> = ({ profile }) => {
     <div className="bg-surface p-5 rounded-2xl border border-border shadow-lg space-y-3">
       <div className="flex items-center gap-2 text-success">
         <GitBranch className="w-4 h-4" />
-        <h3 className="text-xs font-bold uppercase tracking-wider text-textMuted">Skill Tree</h3>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-textSecondary">Skill Tree</h3>
       </div>
 
       <div className="grid grid-cols-2 gap-3">

@@ -106,15 +106,15 @@ export const MatrixMode: React.FC<MatrixModeProps> = ({ onComplete, onExit }) =>
         <div className="flex items-center justify-center gap-8">
           <div>
             <div className="text-3xl font-bold text-textPrimary">{formatTime(result.timeMs)}</div>
-            <div className="text-[10px] text-textMuted uppercase tracking-wider">Time</div>
+            <div className="text-[10px] text-textSecondary uppercase tracking-wider">Time</div>
           </div>
           <div>
             <div className="text-3xl font-bold text-danger">{result.mistakes}</div>
-            <div className="text-[10px] text-textMuted uppercase tracking-wider">Mistakes</div>
+            <div className="text-[10px] text-textSecondary uppercase tracking-wider">Mistakes</div>
           </div>
           <div>
             <div className="text-3xl font-bold text-accent">+{result.xpEarned}</div>
-            <div className="text-[10px] text-textMuted uppercase tracking-wider">XP</div>
+            <div className="text-[10px] text-textSecondary uppercase tracking-wider">XP</div>
           </div>
         </div>
         <div className="flex gap-3">

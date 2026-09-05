@@ -64,6 +64,9 @@ export const BadgesPanel: React.FC<BadgesPanelProps> = ({ profile, totalQuestion
   ];
 
   const unlockedCount = badges.filter((b) => b.unlocked).length;
+  const claimableCount = badges.filter(
+    (b) => b.unlocked && !profile.claimedBadgeIds.includes(b.id)
+  ).length;
 
   const handleClaim = async (badge: RenderBadge) => {
     setClaimingId(badge.id);
@@ -77,9 +80,12 @@ export const BadgesPanel: React.FC<BadgesPanelProps> = ({ profile, totalQuestion
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-accent2">
           <Award className="w-4 h-4" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-textMuted">Badges</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-textSecondary">Badges</h3>
         </div>
         <span className="text-[10px] font-semibold text-textMuted">
+          {claimableCount > 0 && (
+            <span className="text-accent2 font-bold">{claimableCount} to claim &middot; </span>
+          )}
           {unlockedCount} / {badges.length}
         </span>
       </div>
@@ -118,9 +124,14 @@ export const BadgesPanel: React.FC<BadgesPanelProps> = ({ profile, totalQuestion
                 <button
                   onClick={() => handleClaim(badge)}
                   disabled={claimingId === badge.id}
-                  className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-accent2 text-white text-[9px] font-bold hover:bg-accent2/80 transition cursor-pointer disabled:opacity-50"
+                  title={`Claim ${badge.reward} snowflakes for ${badge.label}`}
+                  // Says "Claim", not just "+5": as a bare number this read as a
+                  // label describing what the badge is worth, so the reward sat
+                  // uncollected while people waited for it to arrive by itself.
+                  className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-accent2 text-white text-[9px] font-bold hover:bg-accent2/80 transition cursor-pointer disabled:opacity-50 ring-2 ring-accent2/30 animate-pulse"
                 >
-                  <Snowflake className="w-2.5 h-2.5" />+{badge.reward}
+                  <Snowflake className="w-2.5 h-2.5 shrink-0" />
+                  {claimingId === badge.id ? '...' : `Claim ${badge.reward}`}
                 </button>
               )}
             </div>

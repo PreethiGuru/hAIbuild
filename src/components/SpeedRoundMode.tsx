@@ -112,15 +112,15 @@ export const SpeedRoundMode: React.FC<SpeedRoundModeProps> = ({ onComplete, onEx
         <div className="flex items-center justify-center gap-8">
           <div>
             <div className="text-3xl font-bold text-success">{result.correctCount}</div>
-            <div className="text-[10px] text-textMuted uppercase tracking-wider">Correct</div>
+            <div className="text-[10px] text-textSecondary uppercase tracking-wider">Correct</div>
           </div>
           <div>
             <div className="text-3xl font-bold text-textPrimary">{result.totalAnswered}</div>
-            <div className="text-[10px] text-textMuted uppercase tracking-wider">Answered</div>
+            <div className="text-[10px] text-textSecondary uppercase tracking-wider">Answered</div>
           </div>
           <div>
             <div className="text-3xl font-bold text-accent">+{result.xpEarned}</div>
-            <div className="text-[10px] text-textMuted uppercase tracking-wider">XP</div>
+            <div className="text-[10px] text-textSecondary uppercase tracking-wider">XP</div>
           </div>
         </div>
         <button

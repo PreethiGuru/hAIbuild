@@ -85,7 +85,7 @@ export const PenguinMascot: React.FC<PenguinMascotProps> = ({
       >
         <defs>
           <filter id="penguin-shadow" x="-20%" y="-10%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#000000" floodOpacity="0.4" />
+            <feDropShadow dx="0" dy="3" stdDeviation="2.5" floodColor="#1F2A37" floodOpacity="0.22" />
           </filter>
           <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#1E2838" />
@@ -229,69 +229,81 @@ export const PenguinMascot: React.FC<PenguinMascotProps> = ({
         style={{ aspectRatio: '320/300' }}
       >
         <defs>
+          {/* Daylight scene, to match the light UI. The previous night sky and
+              near-black rock were left over from the dark theme and read as a
+              hole punched in the page. */}
           <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#0B121E" />
-            <stop offset="100%" stopColor="#1A2436" />
+            <stop offset="0%" stopColor="#BBD8F7" />
+            <stop offset="100%" stopColor="#EAF3FD" />
           </linearGradient>
           <linearGradient id="mountainGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#1E2B3E" />
-            <stop offset="100%" stopColor="#0F1722" />
+            <stop offset="0%" stopColor="#F4F9FF" />
+            <stop offset="55%" stopColor="#C2D5EA" />
+            <stop offset="100%" stopColor="#9DB6D2" />
           </linearGradient>
           <linearGradient id="backMountainGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#141E2D" />
-            <stop offset="100%" stopColor="#0A0F18" />
+            <stop offset="0%" stopColor="#E4EEF9" />
+            <stop offset="100%" stopColor="#BACBE0" />
           </linearGradient>
         </defs>
 
-        {/* Night Sky Background with subtle stars */}
+        {/* Daylight sky with a low sun and soft cloud banks */}
         <rect width="320" height="300" fill="url(#skyGrad)" rx="12" />
-        <circle cx="50" cy="40" r="1.5" fill="#87CEEB" opacity="0.6" />
-        <circle cx="280" cy="60" r="1.5" fill="#87CEEB" opacity="0.8" />
-        <circle cx="190" cy="25" r="1" fill="#FFFFFF" opacity="0.5" />
-        <circle cx="90" cy="80" r="1" fill="#87CEEB" opacity="0.4" />
+        <circle cx="268" cy="46" r="16" fill="#FFD966" opacity="0.95" />
+        <circle cx="268" cy="46" r="24" fill="#FFD966" opacity="0.25" />
+        <g fill="#FFFFFF" opacity="0.85">
+          <ellipse cx="62" cy="52" rx="26" ry="9" />
+          <ellipse cx="78" cy="46" rx="17" ry="10" />
+          <ellipse cx="176" cy="30" rx="20" ry="7" />
+          <ellipse cx="190" cy="26" rx="13" ry="8" />
+        </g>
 
         {/* Background Mountain */}
         <polygon
           points="180,300 250,110 320,300"
           fill="url(#backMountainGrad)"
         />
-        <polygon points="250,110 240,140 250,130 260,140" fill="#2C3D55" opacity="0.5" />
+        <polygon points="250,110 240,140 250,130 260,140" fill="#FFFFFF" opacity="0.9" />
 
-        {/* Main Mountain Silhouette */}
+        {/* Main Mountain */}
         <polygon
           points="20,300 110,25 290,300"
           fill="url(#mountainGrad)"
         />
 
+        {/* Shaded right face, so the peak still reads as a solid form now that
+            the whole mountain is pale rather than a silhouette */}
+        <polygon points="110,25 290,300 150,300" fill="#8FA9C7" opacity="0.35" />
+
         {/* Snow Cap at Summit */}
         <path
           d="M 110 25 L 95 65 Q 105 75 110 60 Q 115 75 125 65 Z"
-          fill="#E8F4F8"
+          fill="#FFFFFF"
         />
 
         {/* Dotted Trail Path */}
         <path
           d="M 270 260 L 150 140 L 110 35"
           fill="none"
-          stroke="#87CEEB"
+          stroke="#1A73E8"
           strokeWidth="3"
           strokeDasharray="5,5"
           strokeLinecap="round"
-          opacity="0.85"
+          opacity="0.9"
         />
 
         {/* Milestone Dots */}
         {/* 10% Milestone */}
-        <circle cx="246" cy="236" r="6" fill="#1A1F2E" stroke="#87CEEB" strokeWidth="2" />
-        <circle cx="246" cy="236" r="3" fill="#87CEEB" />
+        <circle cx="246" cy="236" r="6" fill="#FFFFFF" stroke="#1A73E8" strokeWidth="2" />
+        <circle cx="246" cy="236" r="3" fill="#1A73E8" />
 
         {/* 50% Milestone */}
-        <circle cx="150" cy="140" r="6" fill="#1A1F2E" stroke="#F59E0B" strokeWidth="2" />
-        <circle cx="150" cy="140" r="3" fill="#F59E0B" />
+        <circle cx="150" cy="140" r="6" fill="#FFFFFF" stroke="#EA8600" strokeWidth="2" />
+        <circle cx="150" cy="140" r="3" fill="#EA8600" />
 
         {/* 100% Summit Milestone */}
-        <circle cx="110" cy="35" r="7" fill="#1A1F2E" stroke="#26D07C" strokeWidth="2.5" />
-        <circle cx="110" cy="35" r="4" fill="#26D07C" />
+        <circle cx="110" cy="35" r="7" fill="#FFFFFF" stroke="#34A853" strokeWidth="2.5" />
+        <circle cx="110" cy="35" r="4" fill="#34A853" />
 
         {/* Mini Penguin positioned on trail */}
         <g transform={`translate(${penguinPos.x - 12}, ${penguinPos.y - 20}) scale(0.35)`}>

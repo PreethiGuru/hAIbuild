@@ -84,7 +84,7 @@ export const LeagueCard: React.FC<LeagueCardProps> = ({ profile, onProfileChange
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2" style={{ color: accent }}>
           <Trophy className="w-4 h-4" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-textMuted">League</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-textSecondary">League</h3>
         </div>
         <span className="text-[10px] font-semibold text-textMuted">
           Resets in {formatCountdown(msLeft)}
