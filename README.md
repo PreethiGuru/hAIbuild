@@ -8,6 +8,19 @@ No signup, no install. A profile is created on first visit.
 
 Built for Patchamomma 2026 on Google Cloud.
 
+<table>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/today.png" alt="Today tab with the daily Pulse" /></td>
+    <td width="33%"><img src="docs/screenshots/league.png" alt="Weekly league board" /></td>
+    <td width="33%"><img src="docs/screenshots/battle.png" alt="Battle modes" /></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Today</b> &mdash; a Pulse measured from BigQuery, plus three items</td>
+    <td align="center"><b>League</b> &mdash; ranked on this week's XP, settles Sunday 00:00 IST</td>
+    <td align="center"><b>Battle</b> &mdash; six modes so day forty isn't day one</td>
+  </tr>
+</table>
+
 ---
 
 ## Why
@@ -42,6 +55,19 @@ Everything else exists to make the habit survive a bad week:
 - **Guilds**, a skill tree, 8 badges, and an evolving penguin mascot
 - **Weekly Coach report** explaining a 0–100 Fluency Score
 
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/shop.png" alt="Shop" /></td>
+    <td width="50%"><img src="docs/screenshots/badges.png" alt="Badges" /></td>
+  </tr>
+  <tr>
+    <td align="center">Snowflakes earned by climbing, spent on streak insurance</td>
+    <td align="center">Badges, claimable for currency</td>
+  </tr>
+</table>
+
+<img src="docs/screenshots/mountain.png" alt="Mountain climb progress toward 1,000 milestones" width="480" />
+
 ## Architecture
 
 ![Architecture](docs/architecture.png)
@@ -60,6 +86,8 @@ Everything else exists to make the habit survive a bad week:
 | **Firebase** | Client Firestore SDK and security rules; Admin SDK server-side |
 
 ### Notes on a few decisions
+
+<img src="docs/screenshots/ai-hint.png" alt="AI hint rendered in the app" width="420" />
 
 **One model call per piece of content, ever.** The daily problem is identical for every user, so
 generated hints and elaborations are cached in Firestore under a SHA-256 hash of the prompt input and
